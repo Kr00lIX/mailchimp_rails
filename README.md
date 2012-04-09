@@ -1,13 +1,17 @@
 # Mailchimp
 
+* Сontroller for web hooks
+   NOTE: now support only unsubscribe hook
 
-## Usage
-TODO: Write a gem description
+Легкая конфигурация переменных
+
+Обзерверы пользователя
+колбэки
+
 
 ## Installation
 
 Add this line to your application's Gemfile:
-
     gem 'mailchimp'
 
 And then execute:
@@ -18,9 +22,43 @@ Or install it yourself as:
 
     $ gem install mailchimp
 
+## Rails 3 Configuration:
+    rails generate mailhimp:install
+
+This will generate the initializer file.
+
 ## Usage
 
-TODO: Write usage instructions here
+Declare mailchimp_data on your user model:
+    class User < ActiveRecord::Base
+
+      mailchimp_data do |user|
+        # describe mailchimp`s params
+        {
+          EMAIL: user.email,
+          NAME: user.full_name
+        }
+      end
+
+    end
+
+Add Mailchimp web hooks routes:
+
+Site::Application.routes do
+  match 'api/unsubscribe' => Mailchimp.routes
+end
+
+and add http://{site_hostname}/api/unsubscribe url to mailchimp webhooks panel
+
+
+
+
+
+## Caveats
+
+## Useful Links
+- [Mailchimp API 1.3](http://apidocs.mailchimp.com/api/1.3/index.php)
+- [Hominid (wrapper for Mailchimp API)](https://github.com/terra-firma/hominid)
 
 ## Contributing
 
@@ -29,3 +67,4 @@ TODO: Write usage instructions here
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
