@@ -1,4 +1,13 @@
 Dummy::Application.routes.draw do
+
+  #match "api/mailchimp" => Mailchimp::routes
+  #match "api/mailchimp" => Mailchimp::WebHooksController.routes
+  #mount Mailchimp::Engine => "api/mailchimp"
+
+  #match "api/mailchimp" => "Mailchimp::WebHooks#unsubscribe", :as => :mailchimp_hooks
+  match "api/mailchimp" => Mailchimp.routes, :as => :mailchimp_hooks
+
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

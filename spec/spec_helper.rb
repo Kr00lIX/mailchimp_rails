@@ -1,18 +1,28 @@
 # Configure Rails Environment
 ENV["RAILS_ENV"] = "test"
-#Bundler.require(:development)
-
-#debugger
 
 Dir.chdir(File.expand_path("../dummy", __FILE__)) { require File.expand_path("config/environment") }
 
 require 'rspec/rails'
+require 'capybara/rspec'
+require "factory_girl_rails"
+require "ffaker"
+require 'pry'
+
+
 
 ENGINE_RAILS_ROOT = File.join(File.dirname(__FILE__), '../')
 
-#Dir[File.join(ENGINE_RAILS_ROOT, 'spec/support/**/*.rb')].each { |f| require f }
-
 RSpec.configure do |config|
   config.use_transactional_fixtures = true
+
+  config.mock_with :rspec
+
+  config.include Capybara::DSL #, :example_group => { :file_path => /\bspec\/requests\// }
+
+  config.include FactoryGirl::Syntax::Methods
+
+  #config.include Mailchimp::Engine.routes.url_helpers
+  #include Rails.application.routes.url_helpers
 end
 
