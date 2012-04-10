@@ -7,21 +7,24 @@ require "action_pack"
 module Mailchimp
   extend ActiveSupport::Autoload
 
-  autoload_under 'error' do
-    autoload :NotEmplementedError
+  autoload_under 'core' do
+    autoload :Base
+    autoload :Model
+    autoload :User
+    autoload :WebHook
   end
 
-  autoload :Base
-  autoload :Model
   autoload :Controller
-  autoload :WebHook
-
 
   module Controller
     extend ActiveSupport::Autoload
 
     autoload :Config
     autoload :WebHooks
+  end
+
+  autoload_under 'error' do
+    autoload :NotEmplementedError
   end
 
   if defined?(ActiveRecord)
@@ -32,5 +35,8 @@ module Mailchimp
 
   class << self
     delegate :routes, :to => "Mailchimp::Controller::WebHooks"
+    delegate :config, :enabled?, :logger, :to => "Mailchimp::Base"
   end
+
+
 end

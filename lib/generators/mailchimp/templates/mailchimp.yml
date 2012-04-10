@@ -1,0 +1,15 @@
+development:
+  enabled: false
+  api_key: "token"
+  list_id: "token"
+
+production:
+  enabled: false
+  api_key: "token"
+  list_id: "token"
+
+staging:
+  enabled: false
+  api_key: "token"
+  list_id: "token"
+

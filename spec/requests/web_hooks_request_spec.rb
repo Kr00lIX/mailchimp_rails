@@ -9,12 +9,12 @@ describe "Mailchimp::WebHooks" do
   end
 
   describe "unsubscribe action" do
-    let!(:user){ create(:user) }
+    let!(:user) { create(:user) }
 
     it "should mark usubscribed user" do
-      visit mailchimp_hooks_path(type: "unsubscribe", param1: "one", param2: "two")
+      Mailchimp::WebHook.should_receive(:unsubscribe).with("email" => user.email)
 
-      #save_and_open_page
+      visit mailchimp_hooks_path(:type => "unsubscribe", :data => {:email => user.email})
       page.should have_content("ok")
     end
   end

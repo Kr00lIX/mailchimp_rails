@@ -5,7 +5,11 @@ module Mailchimp::Controller
   class WebHooks < ::ApplicationController
 
     def self.routes
-      action(:index)
+      if defined?(Rails) && Rails::VERSION::MAJOR == 3
+        action(:index)
+      else
+        {:controller => "Mailchimp::Controller::WebHooks", :action => :index}
+      end
     end
 
     # universal action for all hooks
@@ -20,6 +24,19 @@ module Mailchimp::Controller
       end
     end
 
+    # @params
+    #  "type": "subscribe",
+    #  "fired_at": "2009-03-26 21:35:57",
+    #  "data[id]": "8a25ff1d98",
+    #  "data[list_id]": "a6b5da1054",
+    #  "data[email]": "api@mailchimp.com",
+    #  "data[email_type]": "html",
+    #  "data[merges][EMAIL]": "api@mailchimp.com",
+    #  "data[merges][FNAME]": "MailChimp",
+    #  "data[merges][LNAME]": "API",
+    #  "data[merges][INTERESTS]": "Group1,Group2",
+    #  "data[ip_opt]": "10.20.10.30",
+    #  "data[ip_signup]": "10.20.10.30"
     def subscribe
       raise Mailchimp::NotEmplementedError, "subscribe action"
     end
@@ -33,7 +50,7 @@ module Mailchimp::Controller
     #  "data[email_type]": "html",
     #  "data[reason]": "hard"
     def unsubscribe
-      Mailchimp::WebHook.unsubscribe(params)
+      Mailchimp::WebHook.unsubscribe(params[:data])
       render :text => "ok"
     end
 

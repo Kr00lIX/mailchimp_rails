@@ -1,0 +1,33 @@
+# encoding: utf-8
+require "spec_helper"
+
+describe Mailchimp::WebHook do
+
+  describe ".unsubscribe" do
+    let!(:email){ build(:user).email }
+
+    it "should run find email for " do
+      Mailchimp::Base.stub!(:enabled? => true, :valid? => true)
+      User.should_receive(:find_by_email).with(email)
+
+      Mailchimp::WebHook.unsubscribe(:email => email)
+    end
+
+    it "should not update user for disabled mailchimp"  do
+      User.should_not_receive(:find_by_email).with(email)
+      Mailchimp::WebHook.stub!(:enabled? => false)
+
+      Mailchimp::WebHook.unsubscribe(:email => email)
+    end
+
+    it "shoud update user for invalid data" do
+      valid_list_id = "some token"
+      User.should_receive(:find_by_email).with(email)
+      Mailchimp::WebHook.stub!(:enabled? => true, :config => {:list_id => valid_list_id})
+
+      Mailchimp::WebHook.unsubscribe(:email => email, :list_id => valid_list_id)
+    end
+
+  end
+
+end

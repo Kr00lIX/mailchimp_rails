@@ -1,6 +1,6 @@
 # encoding: utf-8
 require "spec_helper"
 
-describe Mailchimp do
+describe Mailchimp::Base do
   
 end  
