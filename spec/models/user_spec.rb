@@ -4,12 +4,12 @@ require 'spec_helper'
 describe User do
 
   describe "when app has plugin loaded" do
-    it "should respond to the plugin  class method" do
-      ActiveRecord::Base.should respond_to(:mailchimp_data)
+    it "should respond to the plugin class method" do
+      ActiveRecord::Base.should respond_to(:mailchimp_user)
     end
 
     it "User should respond_to .authenticates_with_sorcery!" do
-      User.should respond_to(:mailchimp_data)
+      User.should respond_to(:mailchimp_user)
     end
   end
 

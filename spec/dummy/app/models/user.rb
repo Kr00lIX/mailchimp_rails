@@ -1,8 +1,9 @@
 class User < ActiveRecord::Base
+
   attr_accessible :email, :first_name, :last_name
 
   ## plugins
-  mailchimp_data do |user|
+  mailchimp_user do |user|
     {
         EMAIL: user.email,
         NAME: user.full_name

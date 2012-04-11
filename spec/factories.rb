@@ -2,15 +2,18 @@ FactoryGirl.define do
   factory :user do
     first_name { Faker::Name.first_name }
     last_name { Faker::Name.last_name }
-
     email { "#{first_name}.#{last_name}@example.com".downcase }
+
+    factory :subscribed_user do
+      after_build { |user| user.send(:initialize_state_machines, :subscription_state => :active)}
+    end
+
+    factory :unsubscribed_user do
+      after_build { |user| user.send(:initialize_state_machines, :subscription_state => :disabled)}
+    end
+
+    factory :subscribed_error_user do
+      after_build { |user| user.send(:initialize_state_machines, :subscription_state => :error)}
+    end
   end
-
-  ## This will use the User class (Admin would have been guessed)
-  #factory :admin, class: User do
-  #  first_name "Admin"
-  #  last_name  "User"
-  #  admin      true
-  #end
-
 end

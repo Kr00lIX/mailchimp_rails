@@ -32,8 +32,8 @@ This will generate the initializer file.
 Declare mailchimp_data on your user model:
     class User < ActiveRecord::Base
 
-      mailchimp_data do |user|
-        # describe mailchimp`s params
+      mailchimp_user do |user|
+        # describe mailchimp's params
         {
           EMAIL: user.email,
           NAME: user.full_name

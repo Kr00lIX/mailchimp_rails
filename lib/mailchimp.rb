@@ -9,7 +9,7 @@ module Mailchimp
 
   autoload_under 'core' do
     autoload :Base
-    autoload :Model
+    autoload :ActiveRecordExtensions
     autoload :User
     autoload :WebHook
   end
@@ -28,7 +28,7 @@ module Mailchimp
   end
 
   if defined?(ActiveRecord)
-    ActiveRecord::Base.send(:include, Mailchimp::Model)
+    ActiveRecord::Base.send(:include, Mailchimp::ActiveRecordExtensions)
   end
 
   require 'mailchimp/engine' if defined?(Rails) && Rails::VERSION::MAJOR == 3

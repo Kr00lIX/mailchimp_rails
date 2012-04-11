@@ -1,3 +1,5 @@
+require "hominid"
+
 class Mailchimp::Base
 
   @@config = {}
@@ -5,10 +7,11 @@ class Mailchimp::Base
 
   class << self
 
-    def init
-      config_hash = YAML.load_file("config/mailchimp.yml")
+    def load_config
+      self.config = {} # clear previos data
+      config_hash = YAML.load_file(Rails.root + "config/mailchimp.yml")
       if config_hash && config_hash[Rails.env]
-        self.config = config_hash[Rails.env].with_indifferent_access
+        self.config = config_hash[Rails.env].symbolize_keys
       end
     rescue
       # ignore configuration errors, MailListsManager will be disabled
@@ -89,3 +92,5 @@ class Mailchimp::Base
     end
   end
 end
+
+Mailchimp::Base.load_config

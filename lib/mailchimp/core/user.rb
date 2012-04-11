@@ -2,10 +2,12 @@ module Mailchimp
   class User < Base
     class << self
 
-      def subscribe(user, parameters = nil, list_id = nil)
+      def subscribe(user, options = {:validate => true})
         run do
-          list_id ||= config[:list_id]
-          parameters ||= user.mailchimp_data
+          return if options[:validate] && !user.unsubscribed?
+
+          list_id = options[:list_id] || config[:list_id]
+          parameters =  options[:parameters] || user.mailchimp_data
 
           begin
             logger.debug "[Mailchimp::User.subscribe] subscribe new email: #{user.email}"
@@ -49,6 +51,8 @@ module Mailchimp
 
       def update(user, parameters = nil, list_id = nil)
         run do
+          return if options[:validate] && !user.subscribed?
+
           list_id ||= config[:list_id]
           parameters ||= user.mailchimp_data
 
