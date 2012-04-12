@@ -3,6 +3,8 @@ module Mailchimp
     class << self
 
       def subscribe(user, options = {:validate => true})
+        assert_valid_options(user, options)
+
         run do
           return if options[:validate] && !user.unsubscribed?
 
@@ -51,15 +53,16 @@ module Mailchimp
         end
       end
 
-      def update(user, parameters = nil, list_id = nil)
+      def update(user, options = {:validate => true})
+        assert_valid_options(user, options)
+
         run do
           return if options[:validate] && !user.subscribed?
-
-          list_id ||= config[:list_id]
-          parameters ||= user.mailchimp_data
+          list_id = options[:list_id] || config[:list_id]
+          parameters =  options[:parameters] || user.mailchimp_data
 
           begin
-            logger.debug "[Mailchimp::User.update] update '#{email}' info"
+            logger.debug "[Mailchimp::User.update] update '#{user.email}' info"
 
             # http://apidocs.mailchimp.com/api/1.3/listupdatemember.func.php
             # listUpdateMember(string apikey, string id, string email_address, array merge_vars, string email_type, boolean replace_interests)
@@ -69,6 +72,8 @@ module Mailchimp
               # @note temporary disable
               #when 215, 232 # email address does not belong to this list, There is no record in the database
               #  subscribe(user, parameters, list_id)
+              when 232 #  There is no record in the database
+                subscribe(user, parameters: parameters, list_id: list_id, validate: false)
               when 270 # is not a valid Interest Group for the list
                 raise error
               else
@@ -112,6 +117,12 @@ module Mailchimp
           # params: string apikey, string id, array batch, boolean double_optin, boolean update_existing, boolean replace_interests
           hominid.list_batch_subscribe(list_id, users.map(&:mailchimp_data), false, true, true)
         end
+      end
+
+      protected
+      def assert_valid_options(user, options)
+        raise ArgumentError, "first argument should be a User instance" unless user.is_a?(::User)
+
       end
     end
   end

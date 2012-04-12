@@ -5,15 +5,15 @@ FactoryGirl.define do
     email { "#{first_name}.#{last_name}@example.com".downcase }
 
     factory :subscribed_user do
-      after_build { |user| user.send(:initialize_state_machines, :subscription_state => :active)}
+      after_build { |user| user.subscription_state = "active" }
     end
 
     factory :unsubscribed_user do
-      after_build { |user| user.send(:initialize_state_machines, :subscription_state => :disabled)}
+      after_build { |user| user.subscription_state = "disabled" }
     end
 
     factory :subscribed_error_user do
-      after_build { |user| user.send(:initialize_state_machines, :subscription_state => :error)}
+      after_build { |user| user.subscription_state = "error" }
     end
   end
 end
