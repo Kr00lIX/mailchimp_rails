@@ -20,7 +20,9 @@ module Mailchimp
               when 214 # The new email address is already subscribed to this list and must be unsubscribed first.
                 # skip
               when 220 # email has been banned
-                user.unsubscribe!
+                # todo: move to event
+                user.subscription_last_error = error.message
+                user.error_subscribe!
               else
                 raise error
             end
@@ -64,8 +66,9 @@ module Mailchimp
             hominid.listUpdateMember(list_id, user.email, parameters, "html", true)
           rescue Hominid::APIError => error
             case(error.fault_code)
-              when 215, 232 # email address does not belong to this list, There is no record in the database
-                subscribe(user, parameters, list_id)
+              # @note temporary disable
+              #when 215, 232 # email address does not belong to this list, There is no record in the database
+              #  subscribe(user, parameters, list_id)
               when 270 # is not a valid Interest Group for the list
                 raise error
               else
@@ -78,11 +81,23 @@ module Mailchimp
       def update_unsubscribes(list_id = nil, campaign_ids = nil)
         unsubscribes(list_id, campaign_ids) do |unsubscribe|
           emails = unsubscribe["data"].collect{ |e| e["email"] }
-          logger.debug "[Mailchimp.update_unsubscribes] update unsubscribes emails: #{emails.join(", ")}"
+          logger.debug "[Mailchimp::User.update_unsubscribes] update unsubscribes emails: #{emails.join(", ")}"
 
           emails.each do |email|
             user = User.find_by_email(email)
-            user.unsubscribe! if user
+            user.unsubscribe! if user && user.subscribed?
+          end
+        end
+      end
+
+      def update_all
+        [].tap do |errors|
+          User.subscribers.find_in_batches(batch_size: 50) do |users|
+            users.each do |user|
+              unless update(user)
+                errors << user.id
+              end
+            end
           end
         end
       end
@@ -91,7 +106,7 @@ module Mailchimp
         run do
           list_id ||= config[:list_id]
 
-          logger.debug "[Mailchimp.subscribe_many] unsubscribe emails: #{emails.join(", ")}"
+          logger.debug "[Mailchimp::User.subscribe_many] unsubscribe emails: #{emails.join(", ")}"
 
           # http://apidocs.mailchimp.com/api/1.3/listbatchsubscribe.func.php
           # params: string apikey, string id, array batch, boolean double_optin, boolean update_existing, boolean replace_interests

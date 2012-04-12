@@ -16,8 +16,13 @@ describe User do
   describe User, "user configuration" do
     subject{ User.new(email: "example@example.com", first_name: "William", last_name: "Shakespeare") }
 
-    it "should have static valid config" do
+    it "should has static valid config" do
       subject.mailchimp_data.should == {EMAIL:"example@example.com", NAME: "William Shakespeare"}
+    end
+
+    it "should has update_mailchimp method" do
+      Mailchimp::User.should_receive(:update).with(subject)
+      subject.update_mailchimp
     end
   end
 
