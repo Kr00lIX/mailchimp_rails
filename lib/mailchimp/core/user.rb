@@ -9,7 +9,7 @@ module Mailchimp
           return if options[:validate] && !user.subscribed?
 
           list_id = options[:list_id] || config[:list_id]
-          parameters =  options[:parameters] || user.mailchimp_data
+          parameters = options[:parameters] || user.mailchimp_data
 
           begin
             logger.debug "[Mailchimp::User.subscribe] subscribe new email: #{user.email}"
@@ -20,6 +20,7 @@ module Mailchimp
             user.subscribe! unless user.subscribed?
 
           rescue Hominid::APIError => error
+            logger.error "[Mailchimp::User.subscribe] error subscribe: #{user.email}. #{error}"
             case(error.fault_code)
               when 214 # The new email address is already subscribed to this list and must be unsubscribed first.
                 # skip
@@ -61,12 +62,13 @@ module Mailchimp
             # listUpdateMember(string apikey, string id, string email_address, array merge_vars, string email_type, boolean replace_interests)
             hominid.listUpdateMember(list_id, user.email, parameters, "html", true)
           rescue Hominid::APIError => error
+            logger.error "[Mailchimp::User.update] error: #{user.email}. #{error}"
             case(error.fault_code)
               # @note temporary disable
               #when 215, 232 # email address does not belong to this list, There is no record in the database
               #  subscribe(user, parameters, list_id)
               when 232 #  There is no record in the database
-                subscribe(user, parameters: parameters, list_id: list_id, validate: false)
+                subscribe(user, :parameters => parameters, :list_id => list_id, :validate => false)
               when 270 # is not a valid Interest Group for the list
                 raise error
               else
@@ -90,7 +92,7 @@ module Mailchimp
 
       def update_all
         [].tap do |errors|
-          User.subscribers.find_in_batches(batch_size: 50) do |users|
+          User.subscribers.find_in_batches(:batch_size => 50) do |users|
             users.each do |user|
               unless update(user)
                 errors << user.id
@@ -115,6 +117,7 @@ module Mailchimp
             user = ::User.find_by_email(email)
             user.unsubscribe! if user && !user.unsubscribed?
           rescue Hominid::APIError => error
+            logger.error "[Mailchimp::User.unsubscribe] error: #{email}. #{error}"
             case(error.fault_code)
               when 215, 232 # email address does not belong to this list
                             #skip this errors

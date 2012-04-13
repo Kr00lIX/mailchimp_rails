@@ -10,35 +10,39 @@ module Mailchimp
   module ActiveRecordExtensions
     def self.included(klass)
       klass.class_eval do
-        class << self
-          def mailchimp_user(&block)
 
-            # todo: validate block
-            @mailchimp_params_proc = block
+        def self.mailchimp_user(&block)
 
-            self.class_eval do
-              extend ClassMethods
-              include InstanceMethods
-            end
+          # todo: validate block
+          @mailchimp_params_proc = block
 
-            scope :subscribers, where(:subscription_state => "subscribed")
-
-            state_machine :subscription_state, :initial => :subscribed do
-
-              event :subscribe do
-                transition [:unsubscribed, :error] => :subscribed
-              end
-
-              event :unsubscribe do
-                transition [:subscribed, :error] => :unsubscribed
-              end
-
-              event :error_subscribe do
-                transition [:active, :subscribed] => :error
-              end
-            end
-
+          self.class_eval do
+            extend ClassMethods
+            include InstanceMethods
           end
+
+          # todo: change this to with_state method
+          if Rails::VERSION::MAJOR == 3
+            scope :subscribers, where(:subscription_state => "subscribed")
+          else
+            named_scope :subscribers, :conditions => {:subscription_state => "subscribed"}
+          end
+
+          state_machine :subscription_state, :initial => :subscribed do
+
+            event :subscribe do
+              transition [:unsubscribed, :error] => :subscribed
+            end
+
+            event :unsubscribe do
+              transition [:subscribed, :error] => :unsubscribed
+            end
+
+            event :error_subscribe do
+              transition [:active, :subscribed] => :error
+            end
+          end
+
         end
       end
     end
@@ -54,7 +58,7 @@ module Mailchimp
 
       def mailchimp_data
         # todo: save data to val and clear after changing model
-        self.class.mailchimp_params_proc.call(self)
+        Util.prepare_params(self.class.mailchimp_params_proc.call(self))
       end
 
       def update_mailchimp

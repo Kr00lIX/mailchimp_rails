@@ -86,10 +86,6 @@ class Mailchimp::Base
       ::Rails.logger
     end
 
-    # todo: move to util
-    def sanitize_string(s)
-      s.gsub(/,/, "\\,")
-    end
   end
 end
 

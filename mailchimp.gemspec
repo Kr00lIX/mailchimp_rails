@@ -36,4 +36,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "ruby_gntp"
   gem.add_development_dependency "launchy"
   gem.add_development_dependency "rb-fsevent"
+
 end
+

@@ -24,7 +24,7 @@ describe "Mailchimp::WebHooks" do
       it "should return not emplimented error" do
         expect do
           visit mailchimp_hooks_path(type: action)
-        end.to raise_error(Mailchimp::NotEmplementedError)
+        end.to raise_error(Mailchimp::NotEmplemented)
       end
     end
   end
