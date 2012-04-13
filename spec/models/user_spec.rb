@@ -79,14 +79,14 @@ describe User do
     describe "mailchimp error codes" do
       let(:user) { build(:subscribed_user) }
 
-      it "should call subscribe for 'There is no record in the database'" do
+      it "(#232) should call subscribe for 'There is no record in the database'" do
         error = mock :faultCode => 232, :message => %Q(There is no record of "#{user.email}" in the database)
         Mailchimp::Base.hominid.stub!(:listUpdateMember).and_raise(Hominid::APIError.new(error))
         Mailchimp::Base.hominid.should_receive(:list_subscribe)
         Mailchimp::User.update(user)
       end
 
-      it "should raise error for 'email address does not belong to this list'" do
+      it "(#215) should raise error for 'email address does not belong to this list'" do
         error = mock :faultCode => 215, :message => %Q(There is no record of "#{user.email}" in the database)
         Mailchimp::Base.hominid.stub!(:listUpdateMember).and_raise(::Hominid::APIError.new(error))
 
@@ -94,6 +94,66 @@ describe User do
           Mailchimp::User.update(user)
         }.to raise_error(Hominid::APIError)
       end
+
+      it "(#270) should raise error for 'is not a valid Interest Group for the list'"
+    end
+  end
+
+  context ".subscribe" do
+    before do
+      Mailchimp::Base.stub!(:enabled? => true)
+    end
+
+    let(:user) { create(:subscribed_user, email: "Ð°ÑÑ…Ð¾Ñ‚Ð°Ð½Ð½@Ð¼Ð°Ð¸Ð».Ñ€Ñƒ") }
+
+    describe "mailchimp error codes" do
+      it "(#502) should mark user as error subscription for 'Invalid Email Address: Ð°ÑÑ…Ð¾Ñ‚Ð°Ð½Ð½@Ð¼Ð°Ð¸Ð».Ñ€Ñƒ'" do
+        error = mock :faultCode => 502, :message => %Q(Invalid Email Address: "#{user.email}")
+        Mailchimp::Base.hominid.stub!(:list_subscribe).and_raise(Hominid::APIError.new(error))
+
+        expect {
+          Mailchimp::User.subscribe(user)
+        }.to change{ user.reload.subscription_state }.from("subscribed").to("error")
+
+        user.subscription_last_error.should match(/Invalid Email Address/)
+      end
+
+      it "(#220) should set error subscription state for 'email has been banned'" do
+        error = mock :faultCode => 220, :message => %Q(email has been banned")
+        Mailchimp::Base.hominid.stub!(:list_subscribe).and_raise(Hominid::APIError.new(error))
+
+        expect {
+          Mailchimp::User.subscribe(user)
+        }.to change { user.reload.subscription_state }.from("subscribed").to("error")
+
+        user.subscription_last_error.should match(/email has been banned/)
+      end
+
+      it "(#214) should skip already subscribed error" do
+        error = mock :faultCode => 214, :message => %Q(The new email address is already subscribed to this list and must be unsubscribed first.")
+        Mailchimp::Base.hominid.stub!(:list_subscribe).and_raise(Hominid::APIError.new(error))
+
+        expect {
+          Mailchimp::User.subscribe(user)
+        }.should_not change { user.reload.subscription_state }
+      end
+    end
+  end
+
+  describe ".unsubscribe" do
+    before do
+      Mailchimp::Base.stub!(:enabled? => true)
+    end
+
+    it "should unsubscribe user" do
+      user, list_id = build(:subscribed_user), "list_token"
+      Mailchimp::Base.hominid.should_receive(:list_unsubscribe).with(list_id, user.email, boolean, boolean, boolean)
+
+      Mailchimp::User.unsubscribe(user.email, list_id: list_id)
+    end
+
+    describe "mailchimp error codes" do
+      it "(#215) should skip if email address does not belong to this list"
     end
   end
 end

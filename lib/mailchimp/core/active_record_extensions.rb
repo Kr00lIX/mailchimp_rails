@@ -21,20 +21,20 @@ module Mailchimp
               include InstanceMethods
             end
 
-            scope :subscribers, where(:subscription_state => "active")
+            scope :subscribers, where(:subscription_state => "subscribed")
 
-            state_machine :subscription_state, :initial => :active do
+            state_machine :subscription_state, :initial => :subscribed do
 
               event :subscribe do
-                transition [:active, :disabled, :error] => :active
+                transition [:unsubscribed, :error] => :subscribed
               end
 
               event :unsubscribe do
-                transition [:active, :disabled, :error] => :unsubscribed
+                transition [:subscribed, :error] => :unsubscribed
               end
 
               event :error_subscribe do
-                transition [:active, :disabled, :error] => :disabled
+                transition [:active, :subscribed] => :error
               end
             end
 
@@ -55,10 +55,6 @@ module Mailchimp
       def mailchimp_data
         # todo: save data to val and clear after changing model
         self.class.mailchimp_params_proc.call(self)
-      end
-
-      def subscribed?
-        subscription_state == "active"
       end
 
       def update_mailchimp

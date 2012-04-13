@@ -5,11 +5,11 @@ FactoryGirl.define do
     email { "#{first_name}.#{last_name}@example.com".downcase }
 
     factory :subscribed_user do
-      after_build { |user| user.subscription_state = "active" }
+      after_build { |user| user.subscription_state = "subscribed" }
     end
 
     factory :unsubscribed_user do
-      after_build { |user| user.subscription_state = "disabled" }
+      after_build { |user| user.subscription_state = "unsubscribed" }
     end
 
     factory :subscribed_error_user do
