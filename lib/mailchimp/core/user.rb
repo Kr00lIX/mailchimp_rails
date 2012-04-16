@@ -68,8 +68,8 @@ module Mailchimp
               # @note temporary disable
               #when 215, 232 # email address does not belong to this list, There is no record in the database
               #  subscribe(user, parameters, list_id)
-              when 232 #  There is no record in the database
-                subscribe(user, :parameters => parameters, :list_id => list_id, :validate => false)
+              #when 232 #  There is no record in the database
+              #  subscribe(user, :parameters => parameters, :list_id => list_id, :validate => false)
               when 270 # is not a valid Interest Group for the list
                 raise error
               else
