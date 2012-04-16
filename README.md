@@ -29,7 +29,7 @@ This will generate the initializer file.
 
 ## Usage
 
-Declare mailchimp_data on your user model:
+Declare mailchimp_user on your user model:
     class User < ActiveRecord::Base
 
       mailchimp_user do |user|
@@ -44,13 +44,11 @@ Declare mailchimp_data on your user model:
 
 Add Mailchimp web hooks routes:
 
-Site::Application.routes do
-  match 'api/unsubscribe' => Mailchimp.routes
-end
+    Site::Application.routes do
+      match 'api/unsubscribe' => Mailchimp.routes
+    end
 
-and add http://{site_hostname}/api/unsubscribe url to mailchimp webhooks panel
-
-
+and add `http://{site_hostname}/api/unsubscribe` url to mailchimp webhooks panel
 
 
 
