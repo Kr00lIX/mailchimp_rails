@@ -21,11 +21,12 @@ module Mailchimp
             include InstanceMethods
           end
 
-          # todo: change this to with_state method
           if Rails::VERSION::MAJOR == 3
             scope :subscribers, where(:subscription_state => "subscribed")
+            scope :unsubscribers, where(:subscription_state => "unsubscribed")
           else
             named_scope :subscribers, :conditions => {:subscription_state => "subscribed"}
+            named_scope :unsubscribers, :conditions => {:subscription_state => "unsubscribed"}
           end
 
           state_machine :subscription_state, :initial => :subscribed do
@@ -39,7 +40,7 @@ module Mailchimp
             end
 
             event :error_subscribe do
-              transition [:active, :subscribed] => :error
+              transition [:unsubscribed, :subscribed] => :error
             end
           end
 
