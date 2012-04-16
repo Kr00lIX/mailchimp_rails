@@ -24,8 +24,7 @@ module Mailchimp
             logger.error "[Mailchimp::User.subscribe] error subscribe: #{user.email}. #{error}"
             case(error.fault_code)
               when 214 # The new email address is already subscribed to this list and must be unsubscribed first.
-                # trying update user
-                update(user, :parameters => parameters, :list_id => list_id, :validate => false)
+                # skip this error
               when 220, 502 # email has been banned, Invalid Email Address
                 UserEvent.subscription_error(user, error)
               else
