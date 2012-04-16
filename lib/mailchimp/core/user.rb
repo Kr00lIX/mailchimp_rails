@@ -26,9 +26,7 @@ module Mailchimp
               when 214 # The new email address is already subscribed to this list and must be unsubscribed first.
                 # skip
               when 220, 502 # email has been banned, Invalid Email Address
-                # todo: move to event
-                user.subscription_last_error = error.message
-                user.error_subscribe!
+                UserEvent.subscription_error(user, error)
               else
                 raise error
             end
@@ -65,11 +63,15 @@ module Mailchimp
           rescue Hominid::APIError => error
             logger.error "[Mailchimp::User.update] error: #{user.email}. #{error}"
             case(error.fault_code)
-              # @note temporary disable
-              #when 215, 232 # email address does not belong to this list, There is no record in the database
-              #  subscribe(user, parameters, list_id)
-              #when 232 #  There is no record in the database
-              #  subscribe(user, :parameters => parameters, :list_id => list_id, :validate => false)
+              # <214> The new email address "{email}" is already subscribed to this list and must be unsubscribed first.
+
+              when 232, 215
+                # <215> The email address "{email}" does not belong to this list
+                # List_NotSubscribed - the email address is not subscribed to the list (but may have been)
+                #
+                # <232> There is no record of "{email}" in the database
+                # 232 = Email_NotExists - we have no record of the email address
+                subscribe(user, :parameters => parameters, :list_id => list_id, :validate => false)
               when 270 # is not a valid Interest Group for the list
                 raise error
               else
