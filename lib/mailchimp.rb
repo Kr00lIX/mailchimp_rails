@@ -22,6 +22,7 @@ module Mailchimp
       autoload :User
       autoload :WebHook
       autoload :Util
+      autoload :UserEvent
     end
 
     autoload_under "controllers" do
@@ -43,6 +44,7 @@ module Mailchimp
     require "mailchimp/core/user"
     require "mailchimp/core/web_hook"
     require "mailchimp/core/util"
+    require "mailchimp/core/user_event"
     require "mailchimp/controllers/web_hooks_controller"
     require "mailchimp/errors/error"
     require "mailchimp/errors/not_emplemented"

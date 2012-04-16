@@ -89,10 +89,9 @@ describe User do
       it "(#215) should raise error for 'email address does not belong to this list'" do
         error = mock :faultCode => 215, :message => %Q(There is no record of "#{user.email}" in the database)
         Mailchimp::Base.hominid.stub!(:listUpdateMember).and_raise(::Hominid::APIError.new(error))
+        Mailchimp::Base.hominid.should_receive(:list_subscribe)
 
-        expect {
-          Mailchimp::User.update(user)
-        }.to raise_error(Hominid::APIError)
+        Mailchimp::User.update(user)
       end
 
       it "(#270) should raise error for 'is not a valid Interest Group for the list'"
