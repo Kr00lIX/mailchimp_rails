@@ -5,9 +5,9 @@ module Mailchimp
 
     engine_name :mailchimp
 
-    config.before_initialize do
-      Mailchimp::Base.load_config
-    end
+    #config.before_initialize do
+    #  Mailchimp::Base.load_config
+    #end
 
     config.generators do |g|
       g.test_framework :rspec, :view_specs => false

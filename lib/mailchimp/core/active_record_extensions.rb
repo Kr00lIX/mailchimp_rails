@@ -12,6 +12,8 @@ module Mailchimp
       klass.class_eval do
 
         def self.mailchimp_user(&block)
+          # todo: check config data
+          Mailchimp::Base.load_config
 
           # todo: validate block
           @mailchimp_params_proc = block

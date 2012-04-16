@@ -16,7 +16,7 @@ module Mailchimp::Util
 
   # prepare array only if it include only strings
   def prepare_array(params, sep = ",")
-    return params unless params.all?{ |params| params.is_a?(String) }
+    return params unless params.all?{ |param| param.is_a?(String) }
     params.map { |param| sanitize_string(param) }.join(sep)
   end
 

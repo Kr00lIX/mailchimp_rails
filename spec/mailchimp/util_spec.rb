@@ -10,6 +10,10 @@ describe Mailchimp::Util do
     it "should return same array if one element is not a string" do
       Mailchimp::Util.prepare_array(["first", 2, "third"]).should == ["first", 2, "third"]
     end
+
+    it "should return same array if one element is a hash" do
+      Mailchimp::Util.prepare_array([{:a=>"a1"}, {:a => "a2"}]).should == [{:a => "a1"}, {:a => "a2"}]
+    end
   end
 
   describe ".sanitize_string" do

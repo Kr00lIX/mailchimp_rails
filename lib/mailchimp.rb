@@ -1,4 +1,4 @@
-
+# -*- encoding: utf-8 -*-
 require "mailchimp/version"
 require 'active_record'
 require "active_support/all"
