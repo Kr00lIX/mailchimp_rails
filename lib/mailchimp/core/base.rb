@@ -34,7 +34,7 @@ class Mailchimp::Base
         called_method = caller[0][/`.*'/][1..-2]
         logger.error("[Mailchimp::Base.#{called_method}] Error ##{retries}': #{error.to_s}")
         if (retries -= 1) > 0
-          sleep(0.5)
+          sleep(0.5) unless Rails.env.test?
           retry
         end
         raise error

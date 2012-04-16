@@ -131,6 +131,7 @@ describe User do
       it "(#214) should skip already subscribed error" do
         error = mock :faultCode => 214, :message => %Q(The new email address is already subscribed to this list and must be unsubscribed first.")
         Mailchimp::Base.hominid.stub!(:list_subscribe).and_raise(Hominid::APIError.new(error))
+        Mailchimp::Base.hominid.should_receive(:listUpdateMember)
 
         expect {
           Mailchimp::User.subscribe(user)
