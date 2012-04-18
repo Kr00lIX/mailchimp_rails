@@ -15,7 +15,10 @@ class Mailchimp::WebHook < Mailchimp::Base
 
     logger.debug "[Mailchimp::WebHook.unsubscribe] mark unsubscribe user '#{params[:email]}'"
     user = ::User.find_by_email(params[:email])
-    user.unsubscribe! if user
+    return false unless user
+
+    user.skip_mailchimp_callbacks = true
+    user.unsubscribe!
   end
 
   private

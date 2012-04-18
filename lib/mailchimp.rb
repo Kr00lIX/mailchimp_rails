@@ -3,22 +3,16 @@ require 'active_record'
 require "active_support/all"
 require "action_pack"
 
-
 module Mailchimp
 
   if defined?(Rails) && Rails::VERSION::MAJOR == 3
     extend ActiveSupport::Autoload
 
-    autoload :Base, "mailchimp/core/base.rb"
-    autoload :ActiveRecordExtensions, "mailchimp/core/active_record_extensions.rb"
-    autoload :User, "mailchimp/core/user.rb"
-    autoload :WebHook,  "mailchimp/core/web_hook.rb"
-    autoload :Util, "mailchimp/core/util.rb"
-
     autoload_under 'core' do
       autoload :Base
-      autoload :ActiveRecordExtensions
+      autoload :UserModel
       autoload :User
+      autoload :Group
       autoload :WebHook
       autoload :Util
       autoload :UserEvent
@@ -39,8 +33,9 @@ module Mailchimp
   else
 
     require "mailchimp/core/base"
-    require "mailchimp/core/active_record_extensions"
+    require "mailchimp/core/user_model"
     require "mailchimp/core/user"
+    require "mailchimp/core/group"
     require "mailchimp/core/web_hook"
     require "mailchimp/core/util"
     require "mailchimp/core/user_event"
@@ -50,7 +45,7 @@ module Mailchimp
   end
 
   if defined?(::ActiveRecord)
-    ::ActiveRecord::Base.send(:include, Mailchimp::ActiveRecordExtensions)
+    ::ActiveRecord::Base.send(:include, Mailchimp::UserModel)
   end
 
   class << self

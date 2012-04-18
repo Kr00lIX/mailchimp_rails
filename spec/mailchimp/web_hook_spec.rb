@@ -4,12 +4,17 @@ require "spec_helper"
 describe Mailchimp::WebHook do
 
   describe ".unsubscribe" do
-    let!(:email){ build(:user).email }
+    let!(:user){ build(:user) }
+    let!(:email){ user.email }
 
-    it "should run find email for " do
+    before do
+      Mailchimp::User.should_not_receive :unsubscribe
+    end
+
+    it "should run find email for user" do
       Mailchimp::Base.stub!(:enabled? => true, :valid? => true)
-      User.should_receive(:find_by_email).with(email)
 
+      ::User.should_receive(:find_by_email).with(email).and_return(user)
       Mailchimp::WebHook.unsubscribe(:email => email)
     end
 
