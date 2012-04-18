@@ -3,27 +3,28 @@ require "spec_helper"
 
 describe MailchimpUserObserver do
 
-  let(:user){ build(:user) }
-
   describe "#create" do
-    it "should subscribe if user want mail" do
+    it "should subscribe" do
       pending
+      user = build(:subscribed_user)
+      user.should be_subscribed
       Mailchimp::User.should_receive(:subscribe).with(user)
       user.save
     end
 
     it "should not subscribe if it doesn't want email" do
+      pending
+      user = build(:unsubscribed_user)
       Mailchimp::User.should_not_receive(:subscribe)
       user.save
     end
   end
 
   describe "#update" do
-    before do
-      user.save
-    end
+    let(:user){ create(:user) }
 
     it "should call update method" do
+      pending
       Mailchimp::User.should_not_receive(:subscribe)
       Mailchimp::User.should_receive(:update).with(user).any_number_of_times
 
@@ -32,12 +33,9 @@ describe MailchimpUserObserver do
   end
 
   describe "#destroy" do
-    before do
-      user.save
-    end
+    let(:user){ create(:user) }
 
     it "should unsubscribe user" do
-      pending
       Mailchimp::User.should_receive(:unsubscribe).with(user.email)
       user.destroy
     end

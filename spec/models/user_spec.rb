@@ -143,16 +143,24 @@ describe User do
     before do
       Mailchimp::Base.stub!(:enabled? => true)
     end
+    let(:user){ build(:subscribed_user) }
 
     it "should unsubscribe user" do
-      user, list_id = build(:subscribed_user), "list_token"
+      list_id = "list_token"
       Mailchimp::Base.hominid.should_receive(:list_unsubscribe).with(list_id, user.email, boolean, boolean, boolean)
 
       Mailchimp::User.unsubscribe(user.email, list_id: list_id)
     end
 
     describe "mailchimp error codes" do
-      it "(#215) should skip if email address does not belong to this list"
+      it "(#215) should skip if email address does not belong to this list" do
+        error = mock :faultCode => 215, :message => %Q(email address does not belong to this list.)
+        Mailchimp::Base.hominid.stub!(:list_unsubscribe).and_raise(Hominid::APIError.new(error))
+
+        expect {
+          Mailchimp::User.unsubscribe(user.email)
+        }.should_not raise_error
+      end
     end
   end
 end

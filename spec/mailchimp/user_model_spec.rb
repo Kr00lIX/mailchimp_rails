@@ -8,8 +8,7 @@ describe "User (model)" do
     specify { Mailchimp::User.should_not_receive(:subscribe) }
 
     it "should call subscribe method" do
-      pending
-      Mailchimp::User.should_receive(:subscribe)
+      Mailchimp::User.should_receive(:subscribe).with(user)
       user.subscribe!
     end
   end
