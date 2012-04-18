@@ -4,7 +4,7 @@ describe Mailchimp::Util do
 
   describe ".prepare_array" do
     it "should join all elements when all elements is a string" do
-      Mailchimp::Util.prepare_array(["first", "second", "third"]).should == "first,second,third"
+      Mailchimp::Util.prepare_array(["first", "second", "third"]).should == "first, second, third"
     end
 
     it "should return same array if one element is not a string" do
@@ -34,12 +34,20 @@ describe Mailchimp::Util do
 
   describe ".prepare_params" do
     it "should return prepared hash" do
-      raw_params = {:bool_true => true, :nil_param => nil, :group => %w(a b)}
+      raw_params = {:bool_true => true, :nil_param => nil, :array1 => %w(a b), :array2 => %w(a'a b"b c,c)}
       params = Mailchimp::Util.prepare_params(raw_params)
 
       params[:bool_true].should == 1
       params[:nil_param].should == ""
-      params[:group].should == "a,b"
+      params[:array1].should == "a, b"
+      params[:array2].should == "a'a, b\"b, c,c"
+    end
+  end
+
+  describe ".prepare_group" do
+    it "should return prepared hash" do
+      raw_params = ["13. Photostory", "15. Raw", "26. Vibiraem Objektiv"]
+      Mailchimp::Util.prepare_group(raw_params).should == "13. Photostory,15. Raw,26. Vibiraem Objektiv"
     end
   end
 
