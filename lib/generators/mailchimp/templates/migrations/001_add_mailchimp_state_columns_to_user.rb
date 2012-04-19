@@ -1,4 +1,4 @@
-class AddSubscriptionStateAndSubscriptionErrorToUsers < ActiveRecord::Migration
+class AddMailchimpStateColumnsToUser < ActiveRecord::Migration
   def change
     add_column :users, :subscription_state, :string
     add_column :users, :subscription_last_error, :string
