@@ -24,7 +24,7 @@ module Mailchimp::Generators
     end
 
     def create_migrations
-      migration_template("migrations/add_mailchimp_state_columns_to_user.rb")
+      migration_template("migrations/add_mailchimp_state_columns_to_user.rb", "db/migrate/add_mailchimp_state_columns_to_user.rb")
     end
 
   end
