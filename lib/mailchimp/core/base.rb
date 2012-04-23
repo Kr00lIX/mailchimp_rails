@@ -86,6 +86,10 @@ class Mailchimp::Base
       ::Rails.logger
     end
 
+    def notify(exception, params)
+      return unless defined?(::Airbrake)
+      ::Airbrake.notify(exception, :parameters => params)
+    end
   end
 end
 
