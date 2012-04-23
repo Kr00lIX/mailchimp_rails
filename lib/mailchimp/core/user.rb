@@ -63,8 +63,9 @@ module Mailchimp
           rescue Hominid::APIError => error
             logger.error "[Mailchimp::User.update] error: #{user.email}. #{error}"
             case(error.fault_code)
-              # <214> The new email address "{email}" is already subscribed to this list and must be unsubscribed first.
-
+              when 214
+                # <214> The new email address "{email}" is already subscribed to this list and must be unsubscribed first.
+                # skip this error
               when 232, 215
                 # <215> The email address "{email}" does not belong to this list
                 # List_NotSubscribed - the email address is not subscribed to the list (but may have been)

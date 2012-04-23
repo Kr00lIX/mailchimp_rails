@@ -86,6 +86,15 @@ describe User do
         Mailchimp::User.update(user)
       end
 
+      it "(#214) should skip already subscribed error" do
+        error = mock :faultCode => 214, :message => %Q(The new email address is already subscribed to this list and must be unsubscribed first.")
+        Mailchimp::Base.hominid.stub!(:listUpdateMember).and_raise(Hominid::APIError.new(error))
+
+        expect {
+          Mailchimp::User.update(user)
+        }.should_not change { user.subscription_state }
+      end
+
       it "(#215) should raise error for 'email address does not belong to this list'" do
         error = mock :faultCode => 215, :message => %Q(There is no record of "#{user.email}" in the database)
         Mailchimp::Base.hominid.stub!(:listUpdateMember).and_raise(::Hominid::APIError.new(error))
