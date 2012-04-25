@@ -81,8 +81,8 @@ module Mailchimp::UserModel
       Mailchimp::Util.prepare_params(self.class.mailchimp_params_proc.call(self))
     end
 
-    def update_mailchimp
-      Mailchimp::User.update(self)
+    def update_mailchimp(options = {})
+      Mailchimp::User.update(self, options)
     end
   end
 
