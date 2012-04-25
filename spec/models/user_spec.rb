@@ -21,7 +21,7 @@ describe User do
     end
 
     it "should has update_mailchimp method" do
-      Mailchimp::User.should_receive(:update).with(subject)
+      Mailchimp::User.should_receive(:update).with(subject, anything)
       subject.update_mailchimp
     end
   end
@@ -171,5 +171,43 @@ describe User do
         }.should_not raise_error
       end
     end
+  end
+
+  describe ".update_all" do
+    before do
+      Mailchimp::Base.stub!(:enabled? => true)
+    end
+
+    let!(:subscribed_user1){ create(:subscribed_user) }
+    let!(:subscribed_user2){ create(:subscribed_user) }
+    let!(:unsubscribed_user){ create(:unsubscribed_user) }
+
+    it "should update all subscribed users by default" do
+      Mailchimp::User.should_receive(:update).with(subscribed_user1, anything)
+      Mailchimp::User.should_receive(:update).with(subscribed_user2, anything)
+      Mailchimp::User.should_not_receive(:update).with(unsubscribed_user, anything)
+      Mailchimp::User.update_all
+    end
+
+    it "should update only first user " do
+      Mailchimp::User.should_receive(:update).with(subscribed_user1, {})
+      Mailchimp::User.should_not_receive(:update).with(subscribed_user2, anything)
+      Mailchimp::User.should_not_receive(:update).with(unsubscribed_user, anything)
+
+      Mailchimp::User.update_all(subscribed_user1.id)
+    end
+
+    it "should update only params in a block if block exists" do
+      Mailchimp::User.should_receive(:update).
+        with(subscribed_user1, :parameters => {:name => subscribed_user1.first_name})
+      Mailchimp::User.should_receive(:update).
+        with(subscribed_user2, :parameters => {:name => subscribed_user2.first_name})
+      Mailchimp::User.should_not_receive(:update).with(unsubscribed_user, anything)
+
+      Mailchimp::User.update_all do |user|
+        {:name => user.first_name}
+      end
+    end
+
   end
 end

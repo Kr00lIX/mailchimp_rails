@@ -3,7 +3,8 @@ module Mailchimp
   class User < Base
     class << self
 
-      def subscribe(user, options = {:validate => true})
+      def subscribe(user, options = {})
+        options.reverse_merge!(:validate => true)
         assert_valid_options(user, options)
 
         run do
@@ -46,7 +47,9 @@ module Mailchimp
         end
       end
 
-      def update(user, options = {:validate => true})
+      def update(user, options = {})
+        options.reverse_merge!(:validate => true)
+
         assert_valid_options(user, options)
 
         run do
@@ -94,15 +97,25 @@ module Mailchimp
         end
       end
 
-      def update_all
-        [].tap do |errors|
-          User.subscribers.find_in_batches(:batch_size => 50) do |users|
-            users.each do |user|
-              unless update(user)
-                errors << user.id
-              end
-            end
-          end
+      # Update subscribed users
+      #
+      # usage:
+      #  # for updating all subscribers
+      #  Mailchimp::User.update_all
+      #
+      #  # update only user NAME field for existing users with 1,2,3 ids
+      #  Mailchimp::User.update_all([1,2,3]) do |user|
+      #     {:NAME => "name #{user.id}"}
+      #  end
+      def update_all(user_ids = [], options = {}, &parameters_block)
+        find_options = {:batch_size => 100}
+        find_options[:conditions] = {:id => user_ids} if user_ids.present?
+        #
+        ::User.subscribers.find_each(find_options) do |user|
+          # @note: clone options if you will add params
+          options[:parameters] = parameters_block.call(user) if block_given?
+
+          update(user, options)
         end
       end
 

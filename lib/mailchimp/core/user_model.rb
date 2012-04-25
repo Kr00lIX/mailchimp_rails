@@ -68,9 +68,12 @@ module Mailchimp::UserModel
       @mailchimp_params_proc
     end
 
-    def update_mailchimp
+    def update_all_mailchimp
+      # todo: сделать через массовый subscribe с обновлением
+      #
       find_each(:batch_size => 50).collect(&:update_mailchimp)
     end
+
 
   end
 
