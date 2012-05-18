@@ -30,11 +30,22 @@ class Mailchimp::Base
 
       begin
         yield(hominid)
+      rescue Hominid::APIError => error
+        case(error.fault_code)
+          # No more than 10 simultaneous connections allowed.
+          # see(http://apidocs.mailchimp.com/api/faq/#faq6)
+          when -50
+            logger.error "[Mailchimp::Base.run] error more than 10 simultaneous connections. Sleeping... 5 seconds"
+            sleep(6)
+            retry
+        else
+          raise error
+        end
       rescue Exception => error
         called_method = caller[0][/`.*'/][1..-2]
         logger.error("[Mailchimp::Base.#{called_method}] Error ##{retries}': #{error.to_s}")
         if (retries -= 1) > 0
-          sleep(0.5) unless Rails.env.test?
+          sleep(3) unless Rails.env.test?
           retry
         end
         raise error
