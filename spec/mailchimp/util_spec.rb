@@ -6,14 +6,6 @@ describe Mailchimp::Util do
     it "should join all elements when all elements is a string" do
       Mailchimp::Util.prepare_array(["first", "second", "third"]).should == "first, second, third"
     end
-
-    it "should return same array if one element is not a string" do
-      Mailchimp::Util.prepare_array(["first", 2, "third"]).should == ["first", 2, "third"]
-    end
-
-    it "should return same array if one element is a hash" do
-      Mailchimp::Util.prepare_array([{:a=>"a1"}, {:a => "a2"}]).should == [{:a => "a1"}, {:a => "a2"}]
-    end
   end
 
   describe ".sanitize_string" do
@@ -33,21 +25,41 @@ describe Mailchimp::Util do
   end
 
   describe ".prepare_params" do
-    it "should return prepared hash" do
-      raw_params = {:bool_true => true, :nil_param => nil, :array1 => %w(a b), :array2 => %w(a'a b"b c,c)}
-      params = Mailchimp::Util.prepare_params(raw_params)
+    before do
+      @params = {:bool_true => true, :nil_param => nil, :array1 => %w(a b), :array2 => %w(a'a b"b c,c), :GROUPING => []}
+    end
+    subject { Mailchimp::Util.prepare_params(@params) }
 
-      params[:bool_true].should == 1
-      params[:nil_param].should == ""
-      params[:array1].should == "a, b"
-      params[:array2].should == "a'a, b\"b, c,c"
+    its([:bool_true]) { should == 1 }
+    its([:nil_param]) { should == "" }
+    its([:array1]) { should == "a, b" }
+    its([:array2]) { should == "a'a, b\"b, c,c" }
+    its([:GROUPING]) { should == [] }
+
+    describe "sanitaze group data " do
+      before do
+        @params = {:GROUPING => [
+          {:name => 'first " group', :groups => ["1. first title", "2. second title", "4. another title"]},
+          {:name => "second ' group", :groups => ["12, first title", "13, second title", "18, another title"]}
+        ]}
+      end
+
+      it "should return prepared params" do
+        subject[:GROUPING].tap do |group_params|
+          group_params[0][:name].should == "first \" group"
+          group_params[0][:groups].should == "1. first title,2. second title,4. another title"
+
+          group_params[1][:name].should == "second ' group"
+          group_params[1][:groups].should == "12\\, first title,13\\, second title,18\\, another title"
+        end
+      end
     end
   end
 
-  describe ".prepare_group" do
+  describe ".prepare_group_array" do
     it "should return prepared hash" do
       raw_params = ["13. Photostory", "15. Raw", "26. Vibiraem Objektiv"]
-      Mailchimp::Util.prepare_group(raw_params).should == "13. Photostory,15. Raw,26. Vibiraem Objektiv"
+      Mailchimp::Util.prepare_group_array(raw_params).should == "13. Photostory,15. Raw,26. Vibiraem Objektiv"
     end
   end
 
