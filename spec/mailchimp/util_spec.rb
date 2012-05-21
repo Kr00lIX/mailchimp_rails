@@ -26,7 +26,7 @@ describe Mailchimp::Util do
 
   describe ".prepare_params" do
     before do
-      @params = {:bool_true => true, :nil_param => nil, :array1 => %w(a b), :array2 => %w(a'a b"b c,c), :GROUPING => []}
+      @params = {:bool_true => true, :nil_param => nil, :array1 => %w(a b), :array2 => %w(a'a b"b c,c), :GROUPINGS => []}
     end
     subject { Mailchimp::Util.prepare_params(@params) }
 
@@ -34,24 +34,29 @@ describe Mailchimp::Util do
     its([:nil_param]) { should == "" }
     its([:array1]) { should == "a, b" }
     its([:array2]) { should == "a'a, b\"b, c,c" }
-    its([:GROUPING]) { should == [] }
+    its([:GROUPINGS]) { should == [] }
 
     describe "sanitaze group data " do
       before do
-        @params = {:GROUPING => [
-          {:name => 'first " group', :groups => ["1. first title", "2. second title", "4. another title"]},
-          {:name => "second ' group", :groups => ["12, first title", "13, second title", "18, another title"]}
-        ]}
+        @params = {
+          :param1 => "first param",
+          :GROUPINGS => [
+            {:name => 'first " group', :groups => ["1. first title", "2. second title", "4. another title"]},
+            {:name => "second ' group", :groups => ["12, first title", "13, second title", "18, another title"]}
+          ]
+        }
       end
 
       it "should return prepared params" do
-        subject[:GROUPING].tap do |group_params|
+        subject[:GROUPINGS].tap do |group_params|
           group_params[0][:name].should == "first \" group"
           group_params[0][:groups].should == "1. first title,2. second title,4. another title"
 
           group_params[1][:name].should == "second ' group"
           group_params[1][:groups].should == "12\\, first title,13\\, second title,18\\, another title"
         end
+
+        subject[:param1].should == "first param"
       end
     end
   end

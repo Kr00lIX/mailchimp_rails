@@ -8,7 +8,7 @@ module Mailchimp::Util
           when NilClass then ""
           when String then sanitize_string(value)
           when Array then
-            if key == :GROUPING # prepare group
+            if key == :GROUPINGS # prepare group
               prepare_group(value)
             else
               prepare_array(value)
