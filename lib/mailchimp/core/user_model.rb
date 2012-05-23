@@ -16,7 +16,7 @@ module Mailchimp::UserModel
           :subscription_state => :subscription_state
         )
 
-        list_name = Mailchimp::List.register(options[:list], :params_proc => block)
+        list_name = Mailchimp::List.register(options[:list], options.merge(:params_proc => block))
 
         self.class_eval do
           extend ClassMethods

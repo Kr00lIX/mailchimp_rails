@@ -13,7 +13,7 @@ class Mailchimp::List
       @instances ||= {}
     end
 
-    def register(name, params = {}, &params_proc)
+    def register(name, params = {})
       name ||= DEFAULT_NAME
       raise "list with #{name} name already defined" if lists.key?(name)
       raise ArgumentError, "undefined params block" unless params[:params_proc].is_a?(Proc)
@@ -45,6 +45,12 @@ class Mailchimp::List
         else
           raise ArgumentError, "couldn't find list_id for '#{name} list"
       end
+
+    @with_states = !!options[:subscription_state] # check using user subscription states
+  end
+
+  def with_states?
+    @with_states
   end
 
   def parameters(model)

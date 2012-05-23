@@ -156,7 +156,7 @@ describe User do
 
     it "should unsubscribe user"  do
       Mailchimp::Base.load_mailchimp_config
-      Mailchimp::Base.hominid.should_receive(:list_unsubscribe).with("second_list_token", user.email, boolean, boolean, boolean)
+      Mailchimp::Base.hominid.should_receive(:list_unsubscribe).with(anything, user.email, boolean, boolean, boolean)
 
       Mailchimp::User.unsubscribe(user.email, list: :second)
     end

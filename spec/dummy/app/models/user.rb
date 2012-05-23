@@ -30,7 +30,7 @@ class User < ActiveRecord::Base
   end
 
   def title
-    "title #{id}"
+    "#{first_name} title #{id}"
   end
 
 end
