@@ -13,3 +13,5 @@ test:
   api_key: "test_api_token"
   list_id: "test_list_token"
 
+  second_list_id: "second_list_token"
+

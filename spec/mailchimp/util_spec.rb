@@ -41,7 +41,7 @@ describe Mailchimp::Util do
         @params = {
           :param1 => "first param",
           :GROUPINGS => [
-            {:name => 'first " group', :groups => ["1. first title", "2. second title", "4. another title"]},
+            {:name => 'first " group', :groups => "1. first title,2. second title,4. another title"},
             {:name => "second ' group", :groups => ["12, first title", "13, second title", "18, another title"]}
           ]
         }
@@ -58,6 +58,7 @@ describe Mailchimp::Util do
 
         subject[:param1].should == "first param"
       end
+
     end
   end
 

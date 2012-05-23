@@ -52,8 +52,9 @@ class Mailchimp::Base
       end
     end
 
-    def unsubscribes(list_id = nil, campaign_ids = nil)
-      campaigns = campaign_ids &&  Array(campaign_ids) || last_campaigns(list_id, :status => "sent")
+    # @param [Symbol, String, Nil] list - list token or list name, by default is a list_id
+    def unsubscribes(list = nil, campaign_ids = nil)
+      campaigns = campaign_ids &&  Array(campaign_ids) || last_campaigns(list, :status => "sent")
       return false if campaigns.blank?
 
       logger.info "[Mailchimp.unsubscribes] campaigns ids: #{campaigns.join(", ")}"
@@ -78,18 +79,29 @@ class Mailchimp::Base
     end
 
     # fetch last campaign ids
-    def last_campaigns(list_id = nil, filters = {})
+    def last_campaigns(list = nil, filters = {})
       run do
-        list_id ||= config[:list_id]
         begin
           # http://apidocs.mailchimp.com/api/1.3/campaigns.func.php
-          campaigns = hominid.campaigns({:list_id => list_id}.merge(filters))
+          campaigns = hominid.campaigns({:list_id => list_id(list)}.merge(filters))
 
           campaigns['data'].collect{ |campaign| campaign["id"] }
         rescue Hominid::APIError => error
           #<301> Campaign stats are not available until the campaign has been completely sent.
           raise error
         end
+      end
+    end
+
+    #
+    #
+    # return list id
+    def list_id(list_name = nil)
+      case(list_name)
+        when String then list_name
+        when Symbol then config[:"#{name}_list_id"]
+      else
+        config[:list_id] || config[:default_list_id]
       end
     end
 

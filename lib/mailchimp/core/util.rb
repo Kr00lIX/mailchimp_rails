@@ -19,7 +19,6 @@ module Mailchimp::Util
     end
   end
 
-  # prepare array only if it include only strings
   def prepare_array(params, sep = ", ")
     #return params unless params.all?{ |param| param.is_a?(String) }
     params.map { |param| sanitize_string(param) }.join(sep)
@@ -32,7 +31,7 @@ module Mailchimp::Util
   def prepare_group(group_params)
     group_params.each do |g|
       g[:name] = sanitize_string(g[:name]) if g.key?(:name)
-      g[:groups] = prepare_group_array(g[:groups]) if g.key?(:groups)
+      g[:groups] = prepare_group_array(g[:groups]) if g.key?(:groups) && g[:groups].is_a?(Array)
     end
     group_params
   end

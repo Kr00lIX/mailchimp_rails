@@ -10,6 +10,7 @@ module Mailchimp
 
     autoload_under 'core' do
       autoload :Base
+      autoload :List
       autoload :UserModel
       autoload :User
       autoload :Group
@@ -33,6 +34,7 @@ module Mailchimp
   else
 
     require "mailchimp/core/base"
+    require "mailchimp/core/list"
     require "mailchimp/core/user_model"
     require "mailchimp/core/user"
     require "mailchimp/core/group"
