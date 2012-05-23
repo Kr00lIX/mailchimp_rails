@@ -41,33 +41,33 @@ describe User do
       end
 
       it "should allow run update for subscribed user" do
-        Mailchimp::Base.hominid.should_receive(:listUpdateMember)
+        Mailchimp::Base.hominid.should_receive(:list_update_member)
 
         @user = build(:subscribed_user)
       end
 
       it "should not call update for unsubscribed user" do
-        Mailchimp::Base.hominid.should_not_receive(:listUpdateMember)
+        Mailchimp::Base.hominid.should_not_receive(:list_update_member)
 
         @user = build(:unsubscribed_user)
       end
 
       it "should not call update for disabled user" do
-        Mailchimp::Base.hominid.should_not_receive(:listUpdateMember)
+        Mailchimp::Base.hominid.should_not_receive(:list_update_member)
 
         @user = build(:subscribed_error_user)
       end
     end
 
     describe "arguments validation" do
-      it "should rise error if call without user arg" do
-        expect {
-          Mailchimp::User.update(nil)
-        }.to raise_error(ArgumentError)
+      it "should call subscribe for unsubscribed user if validation is false" do
+        Mailchimp::Base.hominid.should_receive(:list_subscribe)
+        user = build(:unsubscribed_user)
+        Mailchimp::User.subscribe(user, :validate => false)
       end
 
       it "should call update for unsubscribed user if validation is false" do
-        Mailchimp::Base.hominid.should_receive(:listUpdateMember)
+        Mailchimp::Base.hominid.should_receive(:list_update_member)
 
         user = build(:unsubscribed_user)
         Mailchimp::User.update(user, :validate => false)
@@ -79,16 +79,16 @@ describe User do
     describe "mailchimp error codes" do
       let(:user) { build(:subscribed_user) }
 
-      it "(#232) should call subscribe for 'There is no record in the database'" do
+      it "(#232) should call subscribe for 'There is no record in the database'"  do
         error = mock :faultCode => 232, :message => %Q(There is no record of "#{user.email}" in the database)
-        Mailchimp::Base.hominid.stub!(:listUpdateMember).and_raise(Hominid::APIError.new(error))
+        Mailchimp::Base.hominid.stub!(:list_update_member).and_raise(Hominid::APIError.new(error))
         Mailchimp::Base.hominid.should_receive(:list_subscribe)
         Mailchimp::User.update(user)
       end
 
       it "(#214) should skip already subscribed error" do
         error = mock :faultCode => 214, :message => %Q(The new email address is already subscribed to this list and must be unsubscribed first.")
-        Mailchimp::Base.hominid.stub!(:listUpdateMember).and_raise(Hominid::APIError.new(error))
+        Mailchimp::Base.hominid.stub!(:list_update_member).and_raise(Hominid::APIError.new(error))
 
         expect {
           Mailchimp::User.update(user)
@@ -97,7 +97,7 @@ describe User do
 
       it "(#215) should raise error for 'email address does not belong to this list'" do
         error = mock :faultCode => 215, :message => %Q(There is no record of "#{user.email}" in the database)
-        Mailchimp::Base.hominid.stub!(:listUpdateMember).and_raise(::Hominid::APIError.new(error))
+        Mailchimp::Base.hominid.stub!(:list_update_member).and_raise(::Hominid::APIError.new(error))
         Mailchimp::Base.hominid.should_receive(:list_subscribe)
 
         Mailchimp::User.update(user)
@@ -154,11 +154,11 @@ describe User do
     end
     let(:user){ build(:subscribed_user) }
 
-    it "should unsubscribe user" do
-      list_id = "list_token"
-      Mailchimp::Base.hominid.should_receive(:list_unsubscribe).with(list_id, user.email, boolean, boolean, boolean)
+    it "should unsubscribe user"  do
+      Mailchimp::Base.load_mailchimp_config
+      Mailchimp::Base.hominid.should_receive(:list_unsubscribe).with("second_list_token", user.email, boolean, boolean, boolean)
 
-      Mailchimp::User.unsubscribe(user.email, list_id: list_id)
+      Mailchimp::User.unsubscribe(user.email, list: :second)
     end
 
     describe "mailchimp error codes" do

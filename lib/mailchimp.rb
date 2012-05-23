@@ -11,12 +11,12 @@ module Mailchimp
     autoload_under 'core' do
       autoload :Base
       autoload :List
+      autoload :UserList
       autoload :UserModel
       autoload :User
       autoload :Group
       autoload :WebHook
       autoload :Util
-      autoload :UserEvent
     end
 
     autoload_under "controllers" do
@@ -35,12 +35,12 @@ module Mailchimp
 
     require "mailchimp/core/base"
     require "mailchimp/core/list"
+    require "mailchimp/core/user_list"
     require "mailchimp/core/user_model"
     require "mailchimp/core/user"
     require "mailchimp/core/group"
     require "mailchimp/core/web_hook"
     require "mailchimp/core/util"
-    require "mailchimp/core/user_event"
     require "mailchimp/controllers/web_hooks_controller"
     require "mailchimp/errors/error"
     require "mailchimp/errors/not_emplemented"
@@ -53,6 +53,9 @@ module Mailchimp
   class << self
     delegate :routes, :to => "Mailchimp::WebHooksController"
     delegate :config, :enabled?, :logger, :to => "Mailchimp::Base"
+    delegate :list, :to => "Mailchimp::List"
   end
 
 end
+
+Mailchimp::Base.load_mailchimp_config

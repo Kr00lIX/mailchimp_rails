@@ -16,9 +16,6 @@ module Mailchimp::UserModel
           :subscription_state => :subscription_state
         )
 
-        # todo: check config data
-        Mailchimp::Base.load_config
-
         list_name = Mailchimp::List.register(options[:list], :params_proc => block)
 
         self.class_eval do
@@ -72,7 +69,7 @@ module Mailchimp::UserModel
   module ClassMethods
     # Returns the class instance variable for configuration, when called by the class itself.
     def mailchimp_params_proc(list_name = nil)
-      Mailchimp::List[list_name].params_proc
+      Mailchimp.list(list_name).params_proc
     end
 
     def update_all_mailchimp
@@ -84,9 +81,13 @@ module Mailchimp::UserModel
 
   module InstanceMethods
 
-    def mailchimp_data(list_name = nil)
-      #binding.pry
-      Mailchimp::Util.prepare_params(Mailchimp::List[list_name].params(self))
+    def mailchimp_data(list = nil)
+      mailchimp_list(:list => list).parameters
+    end
+
+    def mailchimp_list(options)
+      list = Mailchimp.list(options[:list])
+      Mailchimp::UserList.new(self, list, options)
     end
 
     def update_mailchimp(options = {})
@@ -102,8 +103,6 @@ module Mailchimp::UserModel
     def mailchimp_after_send
 
     end
-
-
 
   end
 

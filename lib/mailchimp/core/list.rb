@@ -2,7 +2,7 @@ class Mailchimp::List
 
   DEFAULT_NAME = :main
 
-  attr_reader :params, :params_proc
+  attr_reader :params, :params_proc, :id, :name
 
   class << self
     def lists
@@ -21,19 +21,33 @@ class Mailchimp::List
       name
     end
 
-    def [](name)
+    def list(name = nil)
       name ||= DEFAULT_NAME
       raise ArgumentError, "list with '#{name}' name not found" unless lists.key?(name)
-      instances[name] ||= new(lists[name])
+
+      instances[name] ||= new(lists[name].merge(:name => name))
     end
+    alias_method :[], :list
+
   end
 
-  def initialize(options,  params= {})
+  def initialize(options)
     @params = options
+    @name = options[:name]
     @params_proc = options[:params_proc]
+
+    config = Mailchimp.config
+    @id =
+      case(name)
+        when :main then config[:list_id] || config[:main_list_id]
+        when String then name
+        when Symbol then config[:"#{name}_list_id"]
+        else
+          raise ArgumentError, "couldn't find list_id for '#{name} list"
+      end
   end
 
-  def params(model)
+  def parameters(model)
     params_proc.call(model)
   end
 

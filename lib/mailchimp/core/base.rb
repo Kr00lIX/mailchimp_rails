@@ -7,7 +7,7 @@ class Mailchimp::Base
 
   class << self
 
-    def load_config
+    def load_mailchimp_config
       self.config = {} # clear previos data
       config_hash = YAML.load_file(Rails.root + "config/mailchimp.yml")
       if config_hash && config_hash[Rails.env]
@@ -79,29 +79,18 @@ class Mailchimp::Base
     end
 
     # fetch last campaign ids
-    def last_campaigns(list = nil, filters = {})
+    def last_campaigns(list_name = nil, filters = {})
       run do
         begin
           # http://apidocs.mailchimp.com/api/1.3/campaigns.func.php
-          campaigns = hominid.campaigns({:list_id => list_id(list)}.merge(filters))
+          list = Mailchimp::List[list_name]
+          campaigns = hominid.campaigns({:list_id => list.id}.merge(filters))
 
           campaigns['data'].collect{ |campaign| campaign["id"] }
         rescue Hominid::APIError => error
           #<301> Campaign stats are not available until the campaign has been completely sent.
           raise error
         end
-      end
-    end
-
-    #
-    #
-    # return list id
-    def list_id(list_name = nil)
-      case(list_name)
-        when String then list_name
-        when Symbol then config[:"#{name}_list_id"]
-      else
-        config[:list_id] || config[:default_list_id]
       end
     end
 
@@ -116,4 +105,4 @@ class Mailchimp::Base
   end
 end
 
-Mailchimp::Base.load_config
+Mailchimp::Base.load_mailchimp_config

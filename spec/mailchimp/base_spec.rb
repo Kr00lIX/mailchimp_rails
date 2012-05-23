@@ -9,7 +9,7 @@ describe Mailchimp::Base do
         YAML.stub!(:load_file).with(Rails.root + "config/mailchimp.yml").and_return(
                 {"test" => {"enabled" => true, "api_key" => "test token", "list_id" => "test list"}}
         )
-        Mailchimp::Base.load_config
+        Mailchimp::Base.load_mailchimp_config
       end
 
       it "should return correct config data" do
@@ -25,7 +25,7 @@ describe Mailchimp::Base do
       before do
         #YAML.stub!(:load_file).with(Rails.root + "config/mailchimp.yml").and_raise(ArgumentError)
         YAML.stub!(:load_file).and_raise(ArgumentError)
-        Mailchimp::Base.load_config
+        Mailchimp::Base.load_mailchimp_config
       end
 
       it "should return empty config" do

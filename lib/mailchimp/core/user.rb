@@ -4,22 +4,19 @@ module Mailchimp
     class << self
 
       def subscribe(user, options = {})
-        options.reverse_merge!(:validate => true)
-        assert_valid_options(user, options)
-
         run do
-          return if options[:validate] && !user.subscribed?
+          user_list = user.mailchimp_list(options)
 
-          list_id = options[:list_id] || config[:list_id]
-          parameters = options[:parameters] || user.mailchimp_data
+          return unless user_list.subscribed?
 
           begin
             logger.debug "[Mailchimp::User.subscribe] subscribe new email: #{user.email}"
 
             # http://apidocs.mailchimp.com/api/1.3/listsubscribe.func.php
             # params: string apikey, string id, string email_address, array merge_vars, string email_type, bool double_optin, bool update_existing, bool replace_interests, bool send_welcome
-            hominid.list_subscribe(list_id, user.email, parameters, 'html', false, true, true, false)
-            user.subscribe! unless user.subscribed?
+            hominid.list_subscribe(user_list.id, user.email, user_list.parameters, 'html', false, true, true, false)
+
+            user_list.mark_subscribed!
 
           rescue Hominid::APIError => error
             logger.error "[Mailchimp::User.subscribe] error subscribe: #{user.email}. #{error}"
@@ -27,7 +24,7 @@ module Mailchimp
               when 214 # The new email address is already subscribed to this list and must be unsubscribed first.
                 # skip this error
               when 220, 502 # email has been banned, Invalid Email Address
-                UserEvent.subscription_error(user, error)
+                user_list.subscription_error(error)
               else
                 raise error
             end
@@ -35,34 +32,31 @@ module Mailchimp
         end
       end
 
-      def subscribe_many(users, list_id = nil)
+      def subscribe_many(users, list = nil)
         run do
-          list_id ||= config[:list_id]
+          list = Mailchimp::List[list_name]
 
-          logger.debug "[Mailchimp::User.subscribe_many] unsubscribe emails: #{emails.join(", ")}"
+          logger.debug "[Mailchimp::User.subscribe_many] subscribe emails: #{users.collect(&:emails).join(", ")}"
 
           # http://apidocs.mailchimp.com/api/1.3/listbatchsubscribe.func.php
           # params: string apikey, string id, array batch, boolean double_optin, boolean update_existing, boolean replace_interests
-          hominid.list_batch_subscribe(list_id, users.map(&:mailchimp_data), false, true, true)
+          hominid.list_batch_subscribe(list.id, users.map { |u| u.mailchimp_data(list) }, false, true, true)
         end
       end
 
       def update(user, options = {})
-        options.reverse_merge!(:validate => true)
-
-        assert_valid_options(user, options)
-
         run do
-          return if options[:validate] && !user.subscribed?
-          list_id = options[:list_id] || config[:list_id]
-          parameters =  options[:parameters] || user.mailchimp_data
+          user_list = user.mailchimp_list(options)
+
+          return unless user_list.subscribed?
 
           begin
             logger.debug "[Mailchimp::User.update] update '#{user.email}' info"
 
             # http://apidocs.mailchimp.com/api/1.3/listupdatemember.func.php
             # listUpdateMember(string apikey, string id, string email_address, array merge_vars, string email_type, boolean replace_interests)
-            hominid.listUpdateMember(list_id, user.email, parameters, "html", true)
+            hominid.list_update_member(user_list.id, user.email, user_list.parameters, "html", true)
+
           rescue Hominid::APIError => error
             logger.error "[Mailchimp::User.update] error: #{user.email}. #{error}"
             case(error.fault_code)
@@ -75,7 +69,7 @@ module Mailchimp
                 #
                 # <232> There is no record of "{email}" in the database
                 # 232 = Email_NotExists - we have no record of the email address
-                subscribe(user, :parameters => parameters, :list_id => list_id, :validate => false)
+                subscribe(user, :parameters => user_list.parameters, :list => user_list.name, :validate => false)
               when 270 # is not a valid Interest Group for the list
                 raise error
               else
@@ -85,14 +79,14 @@ module Mailchimp
         end
       end
 
-      def update_unsubscribes(list_id = nil, campaign_ids = nil)
-        unsubscribes(list_id, campaign_ids) do |unsubscribe|
+      def update_unsubscribes(list_name = nil, campaign_ids = nil)
+        unsubscribes(list_name, campaign_ids) do |unsubscribe|
           emails = unsubscribe["data"].collect{ |e| e["email"] }
           logger.debug "[Mailchimp::User.update_unsubscribes] update unsubscribes emails: #{emails.join(", ")}"
 
           emails.each do |email|
             user = User.find_by_email(email)
-            user.unsubscribe! if user && user.subscribed?
+            user.mailchimp_list.mark_unsubscribed! if user
           end
         end
       end
@@ -121,18 +115,17 @@ module Mailchimp
 
       def unsubscribe(email, options = {:validate => true})
         run do
-          list_id = options[:list_id] || config[:list_id]
+          list = Mailchimp.list(options[:list])
 
           begin
             logger.debug "[Mailchimp::User.unsubscribe] unsubscribe '#{email}' email"
 
             # http://apidocs.mailchimp.com/api/1.3/listunsubscribe.func.php
             # listUnsubscribe(string apikey, string id, string email_address, boolean delete_member, boolean send_goodbye, boolean send_notify)
-            hominid.list_unsubscribe(list_id, email, false, false, false)
+            hominid.list_unsubscribe(list.id, email, false, false, false)
 
-            # todo: move this to events
             user = ::User.find_by_email(email)
-            user.unsubscribe! if user && !user.unsubscribed?
+            Mailchimp::UserList.new(user, list, options).mark_unsubscribed! if user
           rescue Hominid::APIError => error
             logger.error "[Mailchimp::User.unsubscribe] error: #{email}. #{error}"
             case(error.fault_code)
@@ -145,11 +138,6 @@ module Mailchimp
         end
       end
 
-      protected
-      def assert_valid_options(user, options)
-        raise ArgumentError, "first argument should be a User instance" unless user.is_a?(::User)
-
-      end
     end
   end
 end
