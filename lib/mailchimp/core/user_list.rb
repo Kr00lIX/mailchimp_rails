@@ -15,7 +15,7 @@ class Mailchimp::UserList
   end
 
   def parameters
-    @parameters ||= options[:parameters] || list.parameters(user)
+    @parameters ||= Mailchimp::Util.prepare_params(options[:parameters] || list.parameters(user))
   end
 
   def subscribed?
