@@ -1,9 +1,13 @@
 # -*- encoding: utf-8 -*-
+
+# todo: move run and default options to another layer
 module Mailchimp
   class User < Base
+
     class << self
 
       def subscribe(user, options = {})
+        default_options(options)
         run do
           user_list = user.mailchimp_list(options)
 
@@ -32,7 +36,7 @@ module Mailchimp
         end
       end
 
-      def subscribe_many(users, list = nil)
+      def subscribe_many(users, list_name = nil)
         run do
           list = Mailchimp::List[list_name]
 
@@ -45,6 +49,8 @@ module Mailchimp
       end
 
       def update(user, options = {})
+        default_options(options)
+
         run do
           user_list = user.mailchimp_list(options)
 
@@ -80,6 +86,7 @@ module Mailchimp
       end
 
       def update_all_lists(user, options = {})
+        default_options(options)
         Mailchimp::List.lists.each do |list_name, list_params|
           update(user, options.merge(:list => list_name))
         end
@@ -108,6 +115,7 @@ module Mailchimp
       #     {:NAME => "name #{user.id}"}
       #  end
       def update_all(user_ids = [], options = {}, &parameters_block)
+        default_options(options)
         find_options = {:batch_size => 100}
         find_options[:conditions] = {:id => user_ids} if user_ids.present?
         #
@@ -142,6 +150,14 @@ module Mailchimp
             end
           end
         end
+      end
+
+      protected
+      def default_options(options)
+        options.reverse_merge!(
+          :list => default_list,
+          :validate => true
+        )
       end
 
     end

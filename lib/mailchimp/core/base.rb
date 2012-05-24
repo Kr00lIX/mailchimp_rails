@@ -102,6 +102,17 @@ class Mailchimp::Base
       return unless defined?(::Airbrake)
       ::Airbrake.notify(exception, :parameters => params)
     end
+
+    # set default list for current class
+    def default_list=(new_default_list_name)
+      (class << self; self; end).class_eval do
+        define_method(:default_list) { new_default_list_name }
+      end
+    end
+
+    def default_list
+      Mailchimp::List::DEFAULT_NAME
+    end
   end
 end
 

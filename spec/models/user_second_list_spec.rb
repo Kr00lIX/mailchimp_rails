@@ -70,4 +70,19 @@ describe User, "(second list)" do
     end
   end
 
+  describe ".default_list" do
+    before do
+      Mailchimp::Base.stub!(:enabled? => true)
+    end
+    let(:user) { build(:subscribed_user) }
+
+    it "should update second mailchimp_list" do
+      Mailchimp::Base.hominid.should_receive(:list_update_member).
+              with(anything, user.email, {:EMAIL => user.email, :TITLE => user.title}, anything, anything)
+
+      Mailchimp::Second.update(user)
+    end
+
+  end
+
 end

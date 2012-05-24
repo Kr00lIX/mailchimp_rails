@@ -190,7 +190,7 @@ describe User do
     end
 
     it "should update only first user " do
-      Mailchimp::User.should_receive(:update).with(subscribed_user1, {})
+      Mailchimp::User.should_receive(:update).with(subscribed_user1, hash_including)
       Mailchimp::User.should_not_receive(:update).with(subscribed_user2, anything)
       Mailchimp::User.should_not_receive(:update).with(unsubscribed_user, anything)
 
@@ -199,9 +199,9 @@ describe User do
 
     it "should update only params in a block if block exists" do
       Mailchimp::User.should_receive(:update).
-        with(subscribed_user1, :parameters => {:name => subscribed_user1.first_name})
+        with(subscribed_user1, hash_including(:parameters => {:name => subscribed_user1.first_name}))
       Mailchimp::User.should_receive(:update).
-        with(subscribed_user2, :parameters => {:name => subscribed_user2.first_name})
+        with(subscribed_user2, hash_including(:parameters => {:name => subscribed_user2.first_name}))
       Mailchimp::User.should_not_receive(:update).with(unsubscribed_user, anything)
 
       Mailchimp::User.update_all do |user|
