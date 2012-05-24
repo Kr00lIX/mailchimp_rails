@@ -53,4 +53,21 @@ describe User, "(second list)" do
 
   end
 
+  describe ".update_all_lists" do
+    before do
+      Mailchimp::Base.stub!(:enabled? => true)
+    end
+
+    let(:user) { build(:subscribed_user) }
+
+    it "should call update for disabled user" do
+      Mailchimp::Base.hominid.should_receive(:list_update_member).
+              with(anything, user.email, {:EMAIL => user.email, :NAME => user.full_name}, anything, boolean)
+      Mailchimp::Base.hominid.should_receive(:list_update_member).
+              with(anything, user.email, {:EMAIL => user.email, :TITLE => user.title}, anything, boolean)
+
+      Mailchimp::User.update_all_lists(user)
+    end
+  end
+
 end
