@@ -58,4 +58,4 @@ module Mailchimp
 
 end
 
-Mailchimp::Base.load_mailchimp_config
+Mailchimp::Base.init_mailchimp

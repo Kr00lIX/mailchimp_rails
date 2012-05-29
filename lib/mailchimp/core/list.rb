@@ -15,7 +15,8 @@ class Mailchimp::List
 
     def register(name, params = {})
       name ||= DEFAULT_NAME
-      raise "list with #{name} name already defined" if lists.key?(name)
+      #raise "list with #{name} name already defined" if lists.key?(name)
+      Rails.logger.warn("list with #{name} name already defined") if lists.key?(name)
       raise ArgumentError, "undefined params block" unless params[:params_proc].is_a?(Proc)
       lists[name] = params
       name
@@ -28,6 +29,12 @@ class Mailchimp::List
       instances[name] ||= new(lists[name].merge(:name => name))
     end
     alias_method :[], :list
+
+
+    def reset
+      @lists = {}
+      @instances = {}
+    end
 
   end
 

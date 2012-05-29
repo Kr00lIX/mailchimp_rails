@@ -7,6 +7,11 @@ class Mailchimp::Base
 
   class << self
 
+    def init_mailchimp
+      Mailchimp::List.reset
+      load_mailchimp_config
+    end
+
     def load_mailchimp_config
       self.config = {} # clear previos data
       config_hash = YAML.load_file(Rails.root + "config/mailchimp.yml")
