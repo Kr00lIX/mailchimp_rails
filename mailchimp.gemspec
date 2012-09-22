@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
   gem.platform      = Gem::Platform::RUBY
 
   gem.add_dependency "rails", ">= 2.3.11" #, "~> 3.1.0"
-  gem.add_dependency "hominid", "~> 3.0.4"
+  gem.add_dependency "hominid", "~> 3.0.5"
   gem.add_dependency 'state_machine'
 
   gem.add_development_dependency "sqlite3"
