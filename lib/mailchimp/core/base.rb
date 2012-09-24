@@ -120,5 +120,3 @@ class Mailchimp::Base
     end
   end
 end
-
-Mailchimp::Base.load_mailchimp_config

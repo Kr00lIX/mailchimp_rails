@@ -58,4 +58,4 @@ module Mailchimp
 
 end
 
-Mailchimp::Base.init_mailchimp
+Mailchimp::Base.init_mailchimp unless defined?(Rails) && Rails::VERSION::MAJOR == 3
