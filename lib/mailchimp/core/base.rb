@@ -23,7 +23,7 @@ class Mailchimp::Base
     end
 
     def hominid
-      @@hominid ||= Hominid::API.new(config[:api_key], {:secure => true, :timeout => 300, :api_version=>"1.2"})
+      @@hominid ||= Hominid::API.new(config[:api_key], {:secure => true, :timeout => 300, :api_version=>"1.3"})
     end
 
     def enabled?
