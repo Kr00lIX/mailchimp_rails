@@ -22,8 +22,10 @@ module Mailchimp
     #
     # @note http://apidocs.mailchimp.com/api/1.3/campaigns.func.php
     def self.all(filters = {}, start = 0, limit = 25)
-      logger.debug "[Mailchimp.all] start=#{start}, limit=#{limit}"
-      hominid.campaigns(filters, start, limit)
+      run do
+        logger.debug "[Mailchimp.all] start=#{start}, limit=#{limit}"
+        hominid.campaigns(filters, start, limit)
+      end
     end
 
     def self.fetch_each_member(campaign_id, batch_size = 1000)
@@ -43,8 +45,10 @@ module Mailchimp
     end
 
     def self.fetch_members(campaign_id, start = 0, limit = 1000)
-      logger.debug "[Mailchimp.fetch_members] start=#{start}, limit=#{limit}"
-      hominid.campaignMembers(campaign_id,  "", start, limit)
+      run do
+        logger.debug "[Mailchimp.fetch_members] start=#{start}, limit=#{limit}"
+        hominid.campaignMembers(campaign_id,  "", start, limit)
+      end
     end
 
   end
