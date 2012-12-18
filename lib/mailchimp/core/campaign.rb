@@ -53,7 +53,18 @@ module Mailchimp
     # http://apidocs.mailchimp.com/api/1.3/campaignclickstats.func.php
     def self.links(campaign_id)
       run do
-        hominid.campaignClickStats(campaign_id)
+        begin
+          hominid.campaignClickStats(campaign_id)
+        rescue Hominid::APIError => error
+          logger.error "[Mailchimp::Campaign.links] error get links for ##{campaign_id} campaign. #{error}"
+          case(error.fault_code)
+            when 301
+              logger.error "[Mailchimp::Campaign.links] Campaign stats are not available until the campaign has been completely sent."
+              # skip this error
+            else
+              raise error
+          end
+        end
       end
     end
 
