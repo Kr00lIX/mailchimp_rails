@@ -68,5 +68,25 @@ module Mailchimp
       end
     end
 
+    def self.fetch_each_link_clicks(cid, url, batch_size = 1000)
+      start = -1
+      loop do
+        fetched_data = link_clicks(cid, url, start += 1, batch_size)
+        break if fetched_data["data"].empty?
+
+        fetched_data["data"].each do |clicks|
+          yield(clicks)
+        end
+
+        sleep(rand(0.5))
+      end
+    end
+
+    def self.link_clicks(cid, url, start = 0, limit = 1000)
+      run do
+        hominid.campaignClickDetailAIM(cid, url, start, limit)
+      end
+    end
+
   end
 end
