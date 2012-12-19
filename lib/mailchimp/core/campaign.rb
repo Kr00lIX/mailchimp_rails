@@ -60,7 +60,7 @@ module Mailchimp
           case(error.fault_code)
             when 301
               logger.error "[Mailchimp::Campaign.links] Campaign stats are not available until the campaign has been completely sent."
-              # skip this error
+              nil # skip this error
             else
               raise error
           end
