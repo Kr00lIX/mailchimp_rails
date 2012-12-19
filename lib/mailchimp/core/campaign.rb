@@ -6,7 +6,7 @@ module Mailchimp
       start = -1
       loop do
         fetched_data = all(filters, start += 1, batch_size)
-        break if fetched_data["data"].empty?
+        break if !fetched_data || fetched_data["data"].empty?
 
         fetched_data["data"].each do |campaign|
           yield(campaign)
