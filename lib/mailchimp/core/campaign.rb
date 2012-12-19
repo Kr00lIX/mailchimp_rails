@@ -33,7 +33,7 @@ module Mailchimp
       start = -1
       loop do
         fetched_data = members(campaign_id, start += 1, batch_size)
-        break if fetched_data["data"].empty?
+        break if !fetched_data || fetched_data["data"].empty?
 
         fetched_data["data"].each do |member|
           yield(member)
@@ -45,8 +45,19 @@ module Mailchimp
 
     def self.members(campaign_id, start = 0, limit = 1000)
       run do
-        logger.debug "[Mailchimp.fetch_members] start=#{start}, limit=#{limit}"
-        hominid.campaignMembers(campaign_id,  "", start, limit)
+        logger.debug "[Mailchimp.members] start=#{start}, limit=#{limit}"
+        begin
+          hominid.campaignMembers(campaign_id,  "", start, limit)
+        rescue Hominid::APIError => error
+          logger.error "[Mailchimp::Campaign.members] error get links for ##{campaign_id} campaign. #{error}"
+          case(error.fault_code)
+            when 301
+              logger.error "[Mailchimp::Campaign.members] Campaign stats are not available until the campaign has been completely sent."
+              nil # skip this error
+            else
+              raise error
+          end
+        end
       end
     end
 
