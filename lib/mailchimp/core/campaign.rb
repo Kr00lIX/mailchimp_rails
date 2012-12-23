@@ -104,7 +104,6 @@ module Mailchimp
       loop do
         result = members_actions(cid, limit += 1, batch_size)
         break if result["data"].empty?
-
         result["data"].each do |email, data|
           break if data.empty?
           data.each do |result|
