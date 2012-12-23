@@ -99,5 +99,29 @@ module Mailchimp
       end
     end
 
+    def self.fetch_each_member_action(cid, batch_size = 100, &data_block)
+      limit = -1
+      loop do
+        result = members_actions(cid, limit += 1, batch_size)
+        break if result["data"].empty?
+
+        result["data"].each do |email, data|
+          break if data.empty?
+          data.each do |result|
+            result["email"] = email
+            yield(result)
+          end
+        end
+
+        sleep(rand(0.5))
+      end
+    end
+
+    def self.members_actions(cid, start = 0, limit = 100)
+      run do
+        hominid.campaignEmailStatsAIMAll(cid, start, limit)
+      end
+    end
+
   end
 end
