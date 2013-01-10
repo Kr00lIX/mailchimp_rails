@@ -85,6 +85,13 @@ module Mailchimp
         end
       end
 
+      # @params user with new email
+      def change_email(user, old_email)
+        new_email ||= user.email
+        user.email = old_email
+        update_all_lists(user, :parameters => {:email => new_email})
+      end
+
       def update_all_lists(user, options = {})
         default_options(options)
         Mailchimp::List.lists.each do |list_name, list_params|
