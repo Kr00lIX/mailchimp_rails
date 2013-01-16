@@ -102,10 +102,9 @@ module Mailchimp
     def self.fetch_each_member_action(cid, batch_size = 100, &data_block)
       limit = -1
       loop do
-        result = members_actions(cid, limit += 1, batch_size)
-        break if result["data"].empty?
-        result["data"].each do |email, data|
-          break if data.empty?
+        fetched_data = members_actions(cid, limit += 1, batch_size)
+        break if fetched_data["data"].empty?
+        fetched_data["data"].each do |email, data|
           data.each do |result|
             result["email"] = email
             yield(result)
