@@ -121,5 +121,23 @@ module Mailchimp
       end
     end
 
+    def self.fetch_each_unsubscribed_member(cid, batch_size = 1000, &data_block)
+      limit = -1
+      loop do
+        fetched_data = unsubscribed_members(cid, limit += 1, batch_size)
+        break if fetched_data["data"].empty?
+
+        fetched_data["data"].each do |data|
+          yield(data)
+        end
+      end
+    end
+
+    def self.unsubscribed_members(cid, start = 0, limit = 1000)
+      run do
+        hominid.campaignUnsubscribes(cid, start, limit)
+      end
+    end
+
   end
 end
