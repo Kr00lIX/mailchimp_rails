@@ -125,7 +125,7 @@ module Mailchimp
       limit = -1
       loop do
         fetched_data = unsubscribed_members(cid, limit += 1, batch_size)
-        break if fetched_data["data"].empty?
+        break if !fetched_data && fetched_data["data"].empty?
 
         fetched_data["data"].each do |data|
           yield(data)
@@ -135,9 +135,14 @@ module Mailchimp
 
     def self.unsubscribed_members(cid, start = 0, limit = 1000)
       run do
-        hominid.campaignUnsubscribes(cid, start, limit)
+        begin
+          hominid.campaignUnsubscribes(cid, start, limit)
+        rescue REXML::ParseException => e
+          # for someone campaign returns invalid xml
+          logger.error "[Mailchimp.unsubscribed_members] Error parse XML: #{e}"
+          nil
+        end
       end
     end
-
   end
 end
