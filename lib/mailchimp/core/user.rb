@@ -121,7 +121,7 @@ module Mailchimp
 
           # http://apidocs.mailchimp.com/api/1.3/listbatchsubscribe.func.php
           # params: string apikey, string id, array batch, boolean double_optin, boolean update_existing, boolean replace_interests
-          hominid.list_batch_subscribe(list.id, users.map { |u| u.mailchimp_data(list) }, false, true, true)
+          hominid.list_batch_subscribe(list.id, users.map { |u| u.mailchimp_data(list.name) }, false, true, true)
         end
       end
 
