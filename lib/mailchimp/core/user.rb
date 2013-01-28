@@ -111,26 +111,17 @@ module Mailchimp
         end
       end
 
-      # Update subscribed users
+      # Update users
       #
-      # usage:
-      #  # for updating all subscribers
-      #  Mailchimp::User.update_all
-      #
-      #  # update only user NAME field for existing users with 1,2,3 ids
-      #  Mailchimp::User.update_all([1,2,3]) do |user|
-      #     {:NAME => "name #{user.id}"}
-      #  end
-      def update_all(user_ids = [], options = {}, &parameters_block)
-        default_options(options)
-        find_options = {:batch_size => 100}
-        find_options[:conditions] = {:id => user_ids} if user_ids.present?
-        #
-        ::User.subscribers.find_each(find_options) do |user|
-          # @note: clone options if you will add params
-          options[:parameters] = parameters_block.call(user) if block_given?
+      def update_all(users, options = {})
+        list = Mailchimp.list(options[:list])
 
-          update(user, options)
+        run do
+          logger.debug "[Mailchimp::User.update_all] update #{users.count} users"
+
+          # http://apidocs.mailchimp.com/api/1.3/listbatchsubscribe.func.php
+          # params: string apikey, string id, array batch, boolean double_optin, boolean update_existing, boolean replace_interests
+          hominid.list_batch_subscribe(list.id, users.map { |u| u.mailchimp_data(list) }, false, true, true)
         end
       end
 
