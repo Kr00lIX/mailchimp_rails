@@ -75,7 +75,7 @@ module Mailchimp
                 #
                 # <232> There is no record of "{email}" in the database
                 # 232 = Email_NotExists - we have no record of the email address
-                subscribe(user, :parameters => user_list.parameters, :list => user_list.name, :validate => false)
+                # subscribe(user, :parameters => user_list.parameters, :list => user_list.name, :validate => false)
               when 270 # is not a valid Interest Group for the list
                 raise error
               else

@@ -144,5 +144,24 @@ module Mailchimp
         end
       end
     end
+
+    def self.fetch_each_hard_bounced(cid, batch_size = 1000)
+      limit = -1
+      loop do
+        fetched_data = hard_bounced(cid, limit += 1, batch_size)
+        break if !fetched_data && fetched_data["data"].empty?
+
+        fetched_data["data"].each do |data|
+          yield(data)
+        end
+      end
+    end
+
+    def self.hard_bounced(cid, start = 0, limit = 1000)
+      run do
+        hominid.campaignHardBounces(cid, start, limit)
+      end
+    end
+
   end
 end

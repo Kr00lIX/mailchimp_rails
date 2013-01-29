@@ -21,7 +21,6 @@ module Mailchimp::UserModel
         self.class_eval do
           extend ClassMethods
           include InstanceMethods
-          include CallBacks
 
           if options[:subscription_state]
 
@@ -93,17 +92,6 @@ module Mailchimp::UserModel
     def update_mailchimp(options = {})
       Mailchimp::User.update(self, options)
     end
-  end
-
-  module CallBacks
-    def mailchimp_before_send
-
-    end
-
-    def mailchimp_after_send
-
-    end
-
   end
 
 end
