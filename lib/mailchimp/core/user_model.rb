@@ -34,7 +34,7 @@ module Mailchimp::UserModel
                     else
                       proc { |name, state| named_scope name, :conditions => {:subscription_state => state} }
                     end
-            {:subscribers => "subscribed", :unsubscribers => "unsubscribed", :subscription_error => "error"}.each(&def_scope)
+            {:subscribers => "subscribed", :unsubscribers => "unsubscribed", :bounced => "bounced", :subscription_error => "error"}.each(&def_scope)
 
             state_machine options[:subscription_state], :initial => :subscribed do
 
@@ -44,6 +44,10 @@ module Mailchimp::UserModel
 
               event :unsubscribe do
                 transition all => :unsubscribed
+              end
+
+              event :bounce do
+                transition all => :bounced
               end
 
               event :error_subscribe do
