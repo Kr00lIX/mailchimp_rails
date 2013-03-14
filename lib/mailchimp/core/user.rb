@@ -93,6 +93,13 @@ module Mailchimp
         update_all_lists(user, :parameters => {:email => new_email})
       end
 
+      def update_all_lists(user, options = {})
+        default_options(options)
+        Mailchimp::List.lists.each do |list_name, list_params|
+          update(user, options.merge(:list => list_name))
+        end
+      end
+
       def update_unsubscribes(list_name = nil, campaign_ids = nil)
         unsubscribes(list_name, campaign_ids) do |unsubscribe|
           emails = unsubscribe["data"].collect{ |e| e["email"] }
