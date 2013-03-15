@@ -41,7 +41,7 @@ module Mailchimp
         run do
           list = Mailchimp::List[list_name]
 
-          logger.debug "[Mailchimp::User.subscribe_many] subscribe emails: #{users.collect(&:emails).join(", ")}"
+          logger.debug "[Mailchimp::User.subscribe_many] subscribe emails: #{users.collect(&:email).join(", ")}"
 
           # http://apidocs.mailchimp.com/api/1.3/listbatchsubscribe.func.php
           # params: string apikey, string id, array batch, boolean double_optin, boolean update_existing, boolean replace_interests
@@ -70,13 +70,13 @@ module Mailchimp
               #when 214
               #  # <214> The new email address "{email}" is already subscribed to this list and must be unsubscribed first.
               #  # skip this error
-              #when 232, 215
-              #  # <215> The email address "{email}" does not belong to this list
-              #  # List_NotSubscribed - the email address is not subscribed to the list (but may have been)
-              #  #
-              #  # <232> There is no record of "{email}" in the database
-              #  # 232 = Email_NotExists - we have no record of the email address
-              #  # subscribe(user, :parameters => user_list.parameters, :list => user_list.name, :validate => false)
+              when 232, 215
+                # <215> The email address "{email}" does not belong to this list
+                # List_NotSubscribed - the email address is not subscribed to the list (but may have been)
+                #
+                # <232> There is no record of "{email}" in the database
+                # 232 = Email_NotExists - we have no record of the email address
+                # subscribe(user, :parameters => user_list.parameters, :list => user_list.name, :validate => false)
               when 270 # is not a valid Interest Group for the list
                 raise error
               else
