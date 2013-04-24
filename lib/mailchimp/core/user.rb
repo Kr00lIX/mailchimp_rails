@@ -11,16 +11,16 @@ module Mailchimp
         run do
           user_list = user.mailchimp_list(options)
 
-          return unless user_list.subscribed?
+          #return unless user_list.subscribed?
 
           begin
             logger.debug "[Mailchimp::User.subscribe] subscribe new email: #{user.email}"
 
             # http://apidocs.mailchimp.com/api/1.3/listsubscribe.func.php
             # params: string apikey, string id, string email_address, array merge_vars, string email_type, bool double_optin, bool update_existing, bool replace_interests, bool send_welcome
-            hominid.list_subscribe(user_list.id, user.email, user_list.parameters, 'html', true, false, true, false)
+            hominid.list_subscribe(user_list.id, user.email, user_list.parameters, 'html', options[:double_optin], false, true, false)
 
-            user_list.mark_subscribed!
+            #user_list.mark_subscribed!
 
           rescue Hominid::APIError => error
             logger.error "[Mailchimp::User.subscribe] error subscribe: #{user.email}. #{error}"
@@ -163,8 +163,9 @@ module Mailchimp
       protected
       def default_options(options)
         options.reverse_merge!(
-          :list => default_list,
-          :validate => true
+          :list         =>  default_list,
+          :validate     =>  true,
+          :double_optin =>  true
         )
       end
 
