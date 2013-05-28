@@ -16,6 +16,7 @@ module Mailchimp
       autoload :User
       autoload :Group
       autoload :Campaign
+      autoload :Ecommerce
       autoload :WebHook
       autoload :Util
     end
@@ -41,6 +42,7 @@ module Mailchimp
     require "mailchimp/core/user"
     require "mailchimp/core/group"
     require "mailchimp/core/campaign"
+    require "mailchimp/core/ecommerce"
     require "mailchimp/core/web_hook"
     require "mailchimp/core/util"
     require "mailchimp/controllers/web_hooks_controller"
