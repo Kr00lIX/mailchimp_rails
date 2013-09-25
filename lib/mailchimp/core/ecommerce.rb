@@ -31,7 +31,17 @@ module Mailchimp
       # http://apidocs.mailchimp.com/api/1.3/ecommorderadd.func.php
       def add_order(order)
         run do
-          hominid.ecommOrderAdd(order)
+          begin
+            hominid.ecommOrderAdd(order)
+          rescue Hominid::APIError => error
+            logger.error "[Mailchimp::Ecommerce.add_order] error: #{order.id}. #{error}"
+            case(error.fault_code)
+              when 232 # There is no record with unique id "[UNIQID]"
+                # skip
+              else
+                raise error
+            end
+          end
         end
       end
 
