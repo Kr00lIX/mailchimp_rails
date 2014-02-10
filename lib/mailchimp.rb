@@ -2,7 +2,6 @@
 require 'active_record'
 require "active_support/all"
 require "action_pack"
-require "xmlrpc"
 
 module Mailchimp
 
@@ -47,4 +46,4 @@ module Mailchimp
 end
 
 Mailchimp::Base.init_mailchimp unless defined?(Rails) && Rails::VERSION::MAJOR == 3
-XMLRPC::Client.include XMLRPC::ClientFixContentLenght if RUBY_VERSION.split(".").first.eql?("2")
+require "monkey_patch/xmlrpc" if RUBY_VERSION.split(".").first.eql?("2")

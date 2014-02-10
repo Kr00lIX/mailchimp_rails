@@ -1,3 +1,4 @@
+require "xmlrpc/client"
 module XMLRPC::ClientFixContentLenght
 
   def do_rpc(request, async=false)
@@ -168,3 +169,5 @@ XMLRPC::Client.class_eval do
   end
 
 end
+
+XMLRPC::Client.send :include, XMLRPC::ClientFixContentLenght
