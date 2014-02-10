@@ -2,6 +2,7 @@
 require 'active_record'
 require "active_support/all"
 require "action_pack"
+require "xmlrpc"
 
 module Mailchimp
 
