@@ -3,16 +3,11 @@
 * Сontroller for web hooks
    NOTE: now support only unsubscribe hook
 
-Легкая конфигурация переменных
-
-Обзерверы пользователя
-колбэки
-
 
 ## Installation
 
 Add this line to your application's Gemfile:
-    gem 'mailchimp'
+    gem 'mailchimp-rails', git: 'https://github.com/Kr00lIX/mailchimp_rails.git'
 
 And then execute:
 

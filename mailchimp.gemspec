@@ -2,13 +2,13 @@
 require File.expand_path('../lib/mailchimp/version', __FILE__)
 
 Gem::Specification.new do |gem|
-  gem.name          = "mailchimp"
+  gem.name          = "mailchimp-rails"
 
   gem.authors       = ["Anatoliy Kovalchuk"]
   gem.email         = ["kr00lix@gmail.com"]
   gem.description   = %q{Mailchimp API wrapper}
   gem.summary       = %q{Mailchimp API wrapper through Hominid}
-  gem.homepage      = "http://github.com/prophotos/mailchimp"
+  gem.homepage      = "http://github.com/Kr00lIX/mailchimp_rails"
 
   gem.files         = `git ls-files`.split("\n")
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
