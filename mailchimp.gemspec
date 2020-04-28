@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'state_machine'
 
   gem.add_development_dependency "sqlite3"
-  gem.add_development_dependency "rake", "0.9.2.2"
+  gem.add_development_dependency "rake", ">= 12.3.3"
   gem.add_development_dependency "rspec", "~> 2.8.0"
   gem.add_development_dependency "rspec-rails", "~> 2.8.0"
   gem.add_development_dependency 'factory_girl_rails'
